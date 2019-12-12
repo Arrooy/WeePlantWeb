@@ -5,6 +5,9 @@ body {
     margin: 0px;
     overflow-x: hidden;
     overflow-y: hidden;
+    color: #e4e4e4;
+    font-family: 'Montserrat';
+    /*font-weight: 400;*/
 }
 
 .logoCenter {
@@ -45,4 +48,52 @@ body {
     position: absolute;
     left: 6%;
     top: 0%;
+    background-color: blue;
+}
+
+.leftPanel {
+    width: 50%;
+    height: 100%;
+    background-color: red;
+    float: left;
+    text-align: center;
+}
+
+.rightPanel {
+    background-color: green;
+    width: 50%;
+    height: 100%;
+    float: left;
+    text-align: center;
+}
+
+#gif {
+    width: 95%;
+}
+
+#graphCavas {
+    background-color: chocolate;
+    /*width: 100%;*/
+}
+
+#informationPanel {
+    background-color: darkorchid;
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+}
+
+.matrixButtons {
+    background-color: darkblue;
+    text-align: center;
+}
+
+.matrixButtons button {
+    margin: 5px;
+}
+
+#plantName {}
+
+h1 {
+    font-size: 50px;
 }

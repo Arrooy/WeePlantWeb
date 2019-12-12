@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" type="text/css" href="/client/Style.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400|Raleway:200,500,700" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="/client/Assets/weeplantICO.png">
 
     <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -33,7 +34,38 @@
 
     </div>
     <div id="plantMenu" class="plantMenu">
-        <h1></h1>
+        <div class="leftPanel">
+            <h1 id="plantName">Margarita</h1>
+            <img id="gif" src="/client/Assets/weeplantLOGO.png">
+            <div id="informationPanel">
+                <!--Infomation about the graph-->
+                <h2>Data title</h2>
+                <p>Hola</p>
+                <p>Hola</p>
+                <p>Hola</p>
+            </div>
+        </div>
+        <div class="rightPanel">
+            <h1 id="plantAge">Plant age: 5 days</h1>
+            <div class="matrixButtons">
+                <button>Button 1</button>
+                <button>Button 2</button>
+                <button>Button 3</button>
+                <br>
+                <button>Button 4</button>
+                <button>Button 5</button>
+                <button>Button 6</button>
+                <br>
+                <button>Button 7</button>
+                <button>Button 8</button>
+                <button>Button 9</button>
+                <br>
+                <!--Buttons to select graph-->
+            </div>
+            <canvas id="graphCavas">
+
+            </canvas>
+        </div>
     </div>
 </body>
 
