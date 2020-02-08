@@ -7,11 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="stylesheet" type="text/css" href="/client/Style.css">
+    <link rel="stylesheet" type="text/css" href="/client/modal.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400|Raleway:200,500,700" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="/client/Assets/weeplantICO.png">
 
     <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
     <script src="/client/main.js"></script>
 
     <title>WeePlant</title>
@@ -22,18 +24,18 @@
 
 <body>
 
-    <img id="mainMenu" class="logoCenter" src="/client/Assets/weeplantLOGO.png">
+    <img id="mainMenu" style="display: block;" class="logoCenter" src="/client/Assets/weeplantLOGO.png">
 
     <div class="lateralMenu">
         <img id="icon" class="lateralIcon" style="margin-top: 5px;" src="/client/Assets/weeplantICO.png">
         <div class="divPot">
-            <img id="pot1" class="lateralIcon" style="margin-bottom: 10px;" src="/client/Assets/pot.svg">
-            <img id="pot2" class="lateralIcon" src="/client/Assets/pot.svg">
-            <img id="pot3" class="lateralIcon" style="margin-top: 10px;" src="/client/Assets/pot.svg">
+            <img id="pot1" class="lateralIcon" is_full="false" style="margin-bottom: 10px;" src="/client/Assets/pot.svg">
+            <img id="pot2" class="lateralIcon" is_full="false" src="/client/Assets/pot.svg">
+            <img id="pot3" class="lateralIcon" is_full="false" style="margin-top: 10px;" src="/client/Assets/pot.svg">
         </div>
 
     </div>
-    <div id="plantMenu" class="plantMenu">
+    <div id="plantMenu" style="display: none;"class="plantMenu">
         <div class="leftPanel">
             <h1 id="plantName">Margarita</h1>
             <img id="gif" src="/client/Assets/weeplantLOGO.png">
@@ -67,6 +69,28 @@
             </canvas>
         </div>
     </div>
-</body>
 
+    <!--MODAL-->
+    <div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+          <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
+            <header class="modal__header">
+              <h2 class="modal__title" id="modal-1-title">
+                Lets add a new plant!
+              </h2>
+              <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+            </header>
+            <main class="modal__content" id="modal-1-content">
+              <p>
+                Press the button <b>Move robot</b> to start the new plant process
+              </p>
+            </main>
+            <footer class="modal__footer">
+              <button id="modal__moveRobot" class="modal__btn modal__btn-primary">Move robot</button>
+              <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
+            </footer>
+          </div>
+        </div>
+      </div>
+</body>
 </html>

@@ -16,23 +16,39 @@ var plantAges = [5, 10, 20];
 
 $(document).ready(function() {
 
-    $("#plantMenu").css("display", "none");
-    $("#mainMenu").css("display", "block");
     configIcon();
     configPots();
+    configModal();
+    
 });
 
 var configIcon = function() {
+    
     $("#icon").on('click', function() {
         $("#mainMenu").css("display", "block");
         $("#plantMenu").css("display", "none");
     });
+
     $("#icon").hover(function() {
         $(this).css("opacity", "0.75");
     }, function() {
         $(this).css("opacity", "1");
     });
 }
+var modalClosed = function(modal, trigger){
+    //Elimina el onclick de la tassa.
+    $("#modal__moveRobot").unbind();
+}
+
+var modalOpened = function(modal, trigger){
+    
+}
+
+var configModal = function(){
+    
+    MicroModal.init();
+}
+
 var configPots = function() {
 
     for (let index = 1; index <= 3; index++) {
@@ -44,13 +60,24 @@ var configPots = function() {
         });
 
         item.on('click', function() {
-            socket.emit("newPot",
-                index
-            );
+            
+            if(item.attr('is_full')){
+                
+                $("#modal__moveRobot").on('click',function(){
+                    socket.emit("moveRobot", index);
+                });
 
-            changeData(index - 1);
-            $("#mainMenu").css("display", "none");
-            $("#plantMenu").css("display", "inline-block");
+                MicroModal.show('modal-1',{
+                    onShow: modalOpened,
+                    onClose: modalClosed
+                });
+
+            }else{
+                changeData(index - 1);
+
+                $("#mainMenu").css("display", "none");
+                $("#plantMenu").css("display", "inline-block");
+            }
         });
     }
 }
