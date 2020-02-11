@@ -8,12 +8,15 @@
 
     <link rel="stylesheet" type="text/css" href="/client/Style.css">
     <link rel="stylesheet" type="text/css" href="/client/modal.css">
+    <link rel="stylesheet" type="text/css" href="/client/select.css">
+    <link rel="stylesheet" type="text/css" href="/client/tooltip.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400|Raleway:200,500,700" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="/client/Assets/weeplantICO.png">
 
     <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
     <script src="/client/main.js"></script>
 
     <title>WeePlant</title>
@@ -24,7 +27,7 @@
 
 <body>
 
-    <img id="mainMenu" style="display: block;" class="logoCenter" src="/client/Assets/weeplantLOGO.png">
+    <img id="mainMenu" style="display: none;" class="logoCenter" src="/client/Assets/weeplantLOGO.png">
 
     <div class="lateralMenu">
         <img id="icon" class="lateralIcon" style="margin-top: 5px;" src="/client/Assets/weeplantICO.png">
@@ -35,12 +38,52 @@
         </div>
 
     </div>
-    <div id="plantMenu" style="display: none;"class="plantMenu">
-        <div class="leftPanel">
+    <div id="plantMenu" style="display: block;" class="plantMenu">
+        <div class="topPanel">
             <h1 id="plantName">Margarita</h1>
-            <img id="gif" src="/client/Assets/weeplantLOGO.png">
+        
+            <h1 id="plantAge">Age: <span>5 days</span></h1>
+        </div>
+        
+        <div class="dropdown">
+            <button class="dropbtn">Humidity</button>
+            <div class="dropdown-content">
+              <!--Grafica de la humitat mesurada cada dia-->
+              <a href="#">Humidity</a>
+              <!--Grafica de la altura mesurada cada dia-->
+              <a href="#">Grow</a>
+              <!--Grafica de la quantitat d'aigua mesurada cada dia-->
+              <a href="#">Watering</a>
+              <!--Grafica del color de la planta, mesurada cada dia-->
+              <a href="#">Color</a>
+              <!--Histograma del color de la planta en format d'imatge-->              
+            </div>
+          </div>
+        
+        <div class="chart-container">
+            <canvas id="graphCavas" aria-label="Graph" role="img" ></canvas>
+        </div>
+              <div>
             <div id="informationPanel">
-                <!--Infomation about the graph-->
+                <h2 >Graph Statistics</h2>
+                <p id="MinimumValue" class="statistic">Minimum: 1</p>
+                <p id="MaximumValue" class="statistic">Maximum: 1</p>
+                <p id="AverageValue" class="statistic">Average: 1</p>
+                <p id="MinimumGradientValue" class="statistic">Minimum Gradient: 1</p>
+                <p id="MaximumGradientValue" class="statistic">Maximum Gradient: 1</p>
+            </div> 
+            <img id="gif" src="https://66.media.tumblr.com/d90a47e6589183114fb7170ba5f98146/tumblr_p973flDWVt1syjt2wo1_250.gifv">
+           
+        </div>
+
+
+        <!--<div class="leftPanel">
+
+            
+
+            <img id="gif" style="width: 200px;height:auto;" src="https://66.media.tumblr.com/d90a47e6589183114fb7170ba5f98146/tumblr_p973flDWVt1syjt2wo1_250.gifv">
+            <div id="informationPanel">
+                
                 <h2>Data title</h2>
                 <p>Hola</p>
                 <p>Hola</p>
@@ -49,26 +92,16 @@
         </div>
         <div class="rightPanel">
             <h1 id="plantAge">Plant age: 5 days</h1>
-            <div class="matrixButtons">
-                <button>Button 1</button>
-                <button>Button 2</button>
-                <button>Button 3</button>
-                <br>
-                <button>Button 4</button>
-                <button>Button 5</button>
-                <button>Button 6</button>
-                <br>
-                <button>Button 7</button>
-                <button>Button 8</button>
-                <button>Button 9</button>
-                <br>
-                <!--Buttons to select graph-->
-            </div>
-            <canvas id="graphCavas">
-
-            </canvas>
-        </div>
+            <select id="cars">
+                <option value="">Volvo</option>
+                <option value="saab">Saab</option>
+                <option value="opel">Opel</option>
+                <option value="audi">Audi</option>
+              </select>
+            <canvas id="graphCavas" aria-label="Graph" role="img" ></canvas>
+        </div>-->
     </div>
+
 
     <!--MODAL-->
     <div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
@@ -76,18 +109,35 @@
           <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
             <header class="modal__header">
               <h2 class="modal__title" id="modal-1-title">
-                Lets add a new plant!
+                Adding a new plant
               </h2>
               <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
             </header>
-            <main class="modal__content" id="modal-1-content">
+            <br class="modal__content" id="modal-1-content">
               <p>
-                Press the button <b>Move robot</b> to start the new plant process
+                When the robot stops moving, present the <b>QR</b> in front of the robot camera.
               </p>
+              <p>This popup will disapear when the robot <b>recognizes a QR</b>.</p>
+              <p>Press <b>Cancel</b> or the <b>cross</b> in the corner to stop adding a plant in the <span> </span> pot.</p>
+              
+              <div class="tooltip">What is a QR?
+                <span class="tooltiptext"><p style="margin: 10px;width:50vw">
+                  A barcode is a machine-readable optical label that contains information about the item to which it is attached.</p>
+              </span>
+              </div>
+              <p></p>
+              
+              <div class="tooltip">Where is the QR located?
+                <span class="tooltiptext"><p style="margin: 10px;white-space: nowrap;">Every seed packet contains a <b>QR</b> code.</p>
+                  <p style="margin: 10px;white-space: nowrap;">The <b>QR</b> is located in the back-face of the seed pack.</p> 
+                  <img class="QRTESTCODE" src="/client/Assets/QR-code.png">
+                  <p>The <b>QR</b> looks like the above example</p>
+                </span>
+              </div>
+              <p></p>
             </main>
             <footer class="modal__footer">
-              <button id="modal__moveRobot" class="modal__btn modal__btn-primary">Move robot</button>
-              <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
+              <button class="modal__btn" data-micromodal-close aria-label="Cancel">Cancel</button>
             </footer>
           </div>
         </div>

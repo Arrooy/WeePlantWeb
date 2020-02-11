@@ -19,6 +19,7 @@ $(document).ready(function() {
     configIcon();
     configPots();
     configModal();
+    drawGraph();
     
 });
 
@@ -108,70 +109,50 @@ var changeData = function(index) {
     //Update the view with the new data.
     $("#plantName").text(name);
     $("#plantAge").text("Plant age: " + age + " days");
-    drawGraph(data, time);
-}
-var getMinMax = function getMinMax(arr) {
-    let min = arr[0];
-    let max = arr[0];
-    let i = arr.length;
-
-    while (i--) {
-        min = arr[i] < min ? arr[i] : min;
-        max = arr[i] > max ? arr[i] : max;
-    }
-    return [min, max];
+    drawGraph();
 }
 
-var drawGraph = function(data, time) {
-
-    let minData, maxData;
-    [minData, maxData] = getMinMax(data);
-    var c = document.getElementById("graphCavas");
-    drawAxis(c, time[0], time[time.length - 1], minData, maxData);
-}
-
-//fx,lx,fy,ly son first x, last x... per saber la resolucio de la grafica.
-var drawAxis = function(c, fx, lx, fy, ly) {
-    var ctx = c.getContext("2d");
-    //Escalat de les variables rebudes.
-    var width = c.width;
-    var height = c.height;
-
-    let maxY = 10;
-    let maxX = width - 10;
-    let originX = 10;
-    let originY = height - 10;
-
-    ctx.fillStyle = '#F0F000';
-    ctx.lineWidth = 2;
-    ctx.lineJoin = "round";
-
-    ctx.beginPath();
-    ctx.moveTo(originX, maxY);
-    ctx.lineTo(originX, originY);
-    ctx.lineTo(maxX, originY);
-    ctx.stroke();
-
-}
-
-var line = function(ctx, x1, y1, x2, y2) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(100, 200);
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = '#808000';
-    ctx.stroke();
-}
-
-var draw = function() {
-    var c = document.getElementById("graphCavas");
-    var width = c.width;
-    var height = c.height;
-    var ctx = c.getContext("2d");
-    ctx.beginPath();
-    ctx.arc(50, 50, 40, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(100, 20, 100, 100);
+var drawGraph = function(){
+    var ctx = document.getElementById('graphCavas').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio:false,
+            tooltips: {
+                mode: 'nearest',
+                intersect: 'false'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
 }

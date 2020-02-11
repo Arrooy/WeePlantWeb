@@ -1,11 +1,11 @@
 body {
-    background: #0b7b68;
+    background: #0B7A67;
     width: 100%;
     height: 100vh;
     margin: 0px;
     overflow-x: hidden;
     overflow-y: hidden;
-    color: #e4e4e4;
+    color: #FFF8F0;
     font-family: 'Montserrat';
     /*font-weight: 400;*/
 }
@@ -18,7 +18,7 @@ body {
 }
 
 .lateralMenu {
-    background-color: #010e0c;
+    background-color: #092327;
     width: 6%;
     height: 100%;
     text-align: center;
@@ -47,7 +47,7 @@ body {
     position: absolute;
     left: 6%;
     top: 0%;
-    background-color: blue;
+    background-color: #0B7A67;
 }
 
 .leftPanel {
@@ -66,32 +66,55 @@ body {
     text-align: center;
 }
 
-#gif {
-    width: 95%;
+#graphCavas {
+    background-color: #FFF8F0;
+    width: 100%;
 }
 
-#graphCavas {
-    background-color: chocolate;
+#plantName {
+    display: inline-block;
+    text-align: left;
+    margin-left: 15px;
+}
+
+#plantAge {
+    font-size: 20px;
+    margin-top: 73.5px;
+    margin-right: 15px;
+    float: right;
+}
+
+#gif{
+    height:auto;
+    width: 40%;
+    float:right;
+}
+
+.chart-container {
+    position: relative;
+    height: 45vh;
     width: 100%;
+}
+
+#GraphSelection {
+    border: none;
+    outline: none;
+    scroll-behavior: smooth;
+    width:auto;
 }
 
 #informationPanel {
     background-color: darkorchid;
-    text-align: center;
-    margin: 0 auto;
-    width: 80%;
+    text-align: left;
+    float:left;
+    height: auto;
+    margin:0px;
+    
 }
 
-.matrixButtons {
-    background-color: darkblue;
-    text-align: center;
+.statistic{
+    margin:2px;
 }
-
-.matrixButtons button {
-    margin: 5px;
-}
-
-#plantName {}
 
 h1 {
     font-size: 50px;

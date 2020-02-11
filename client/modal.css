@@ -18,13 +18,13 @@
   }
   
   .modal__container {
-    background-color: #fff;
+    background-color: #FFF8F0;
     padding: 30px;
-    max-width: 500px;
+    max-width: 700px;
     max-height: 100vh;
     border-radius: 4px;
-    overflow-y: auto;
     box-sizing: border-box;
+    color:#08415C;
   }
   
   .modal__header {
@@ -37,9 +37,9 @@
     margin-top: 0;
     margin-bottom: 0;
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     line-height: 1.25;
-    color: #00449e;
+    color: #08415C;
     box-sizing: border-box;
   }
   
@@ -54,7 +54,7 @@
     margin-top: 2rem;
     margin-bottom: 2rem;
     line-height: 1.5;
-    color: rgba(0,0,0,.8);
+    color: #092327;
   }
   
   .modal__btn {
@@ -63,8 +63,8 @@
     padding-right: 1rem;
     padding-top: .5rem;
     padding-bottom: .5rem;
-    background-color: #e6e6e6;
-    color: rgba(0,0,0,.8);
+    background-color: #08415C;
+    color:#FFF8F0;
     border-radius: .25rem;
     border-style: none;
     border-width: 0;
@@ -91,8 +91,8 @@
   }
   
   .modal__btn-primary {
-    background-color: #00449e;
-    color: #fff;
+    background-color: #08415C;
+    color: #FFF8F0;
   }
   
   
