@@ -12,6 +12,7 @@ body {
 }
 
 .logoCenter {
+    visibility: hidden;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -46,6 +47,8 @@ body {
     width: 94%;
     position: absolute;
     
+    visibility: visible;
+
     display: flex;
     flex-flow: column;
     height: 100%;
@@ -78,13 +81,13 @@ body {
     width: fit-content;
     margin: 0 auto;
     position: absolute;
-    right: 0%;;
+    right: 0%;
+    top:50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+
 }
 
-.gifDiv{
-    width:50%;
-    height: auto;
-}
 
 .chart-container {
     position: relative;
@@ -113,8 +116,9 @@ body {
 }
 
 .bottomPanelContainer{
-    /*height: 30vh;*/
-    width: 50vw;
+    
+    flex: 1 1 auto;
+    width: 100%;
     position: relative;
 }
 
