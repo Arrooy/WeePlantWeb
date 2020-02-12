@@ -16,6 +16,7 @@
     text-align: center;
     border-radius: 4px;
     transform: translate(0, -50%);
+    border: 1px solid white;
     /* Position the tooltip text - see examples below! */
     position: absolute;
     z-index: 150;

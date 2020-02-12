@@ -4,10 +4,11 @@ body {
     height: 100vh;
     margin: 0px;
     overflow-x: hidden;
-    overflow-y: hidden;
+    /*overflow-y: hidden;*/
     color: #FFF8F0;
+
     font-family: 'Montserrat';
-    /*font-weight: 400;*/
+    font-weight: 400;
 }
 
 .logoCenter {
@@ -43,27 +44,15 @@ body {
 
 .plantMenu {
     width: 94%;
-    height: 100%;
     position: absolute;
+    
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    
     left: 6%;
     top: 0%;
     background-color: #0B7A67;
-}
-
-.leftPanel {
-    width: 50%;
-    height: 100%;
-    background-color: red;
-    float: left;
-    text-align: center;
-}
-
-.rightPanel {
-    background-color: green;
-    width: 50%;
-    height: 100%;
-    float: left;
-    text-align: center;
 }
 
 #graphCavas {
@@ -86,13 +75,20 @@ body {
 
 #gif{
     height:auto;
-    width: 40%;
-    float:right;
+    width: fit-content;
+    margin: 0 auto;
+    position: absolute;
+    right: 0%;;
+}
+
+.gifDiv{
+    width:50%;
+    height: auto;
 }
 
 .chart-container {
     position: relative;
-    height: 45vh;
+    height: 40vh;
     width: 100%;
 }
 
@@ -103,17 +99,27 @@ body {
     width:auto;
 }
 
-#informationPanel {
-    background-color: darkorchid;
+.informationPanel {
+    /*background-color: darkorchid;*/
     text-align: left;
     float:left;
-    height: auto;
-    margin:0px;
     
+    margin: 0;
+    margin-left: 15px;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.bottomPanelContainer{
+    /*height: 30vh;*/
+    width: 50vw;
+    position: relative;
 }
 
 .statistic{
-    margin:2px;
+    margin: 0.6vh;
 }
 
 h1 {

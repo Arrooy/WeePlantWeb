@@ -19,9 +19,54 @@ $(document).ready(function() {
     configIcon();
     configPots();
     configModal();
+    configDropdownMenu();
     drawGraph();
-    
+    configDropdownHover()
 });
+
+var configDropdownMenu = function(){
+    var a = $("#dropdown_options *");
+    for(var i = 0; i < a.length; i++){ 
+        $("#" + a[i].id).click({item:a,index:i}, dropdownClick);
+    }
+};
+
+var dropdownClick = function(event){
+    $('#dropdown_name').text(event.data.item[event.data.index].text);
+    $(".dropdown-content").css("visibility","hidden");
+    var selection = event.data.item[event.data.index];
+    
+    switch(selection.text){
+        case "Humidity":
+            console.log("Humidity!");
+            break;
+        case "Grow":
+            console.log("Grow!");
+            break;
+        case "Watering":
+            console.log("Watering!");
+            break;
+        case "Color":
+            console.log("Color!");
+            break;
+        default:       
+    }
+};
+
+var configDropdownHover = function(){
+    $(".dropdown").hover( function(){
+        //Handler hover in
+        $(".dropdown-content").css("visibility","visible");
+    }, function(){
+        //Handler hover out
+        $(".dropdown").hover( function(){
+            //Handler hover in
+        },function(){
+            //Handler hover out
+            $(".dropdown-content").css("visibility","hidden");
+        });
+    });
+}
 
 var configIcon = function() {
     
@@ -35,25 +80,25 @@ var configIcon = function() {
     }, function() {
         $(this).css("opacity", "1");
     });
-}
+};
 var modalClosed = function(modal, trigger){
     //Elimina el onclick de la tassa.
     $("#modal__moveRobot").unbind();
-}
+};
 
 var modalOpened = function(modal, trigger){
     
-}
+};
 
 var configModal = function(){
     
     MicroModal.init();
-}
+};
 
 var configPots = function() {
 
-    for (let index = 1; index <= 3; index++) {
-        let item = $("#pot" + index);
+    for (var index = 1; index <= 3; index++) {
+        var item = $("#pot" + index);
         item.hover(function() {
             $(this).css("opacity", "0.75");
         }, function() {
@@ -81,24 +126,24 @@ var configPots = function() {
             }
         });
     }
-}
+};
 
 
 //Retorna una tupla amb les dades i els instants de temps de cada dada.
 var getGraphData = function(index) {
     return [time[index], data[index]];
-}
+};
 
 var getName = function(index) {
     return plantNames[index];
-}
+};
 
 var getAge = function(index) {
     return plantAges[index];
-}
+};
 
 var changeData = function(index) {
-    let data, time, name, age;
+    var data, time, name, age;
 
     //Get all the data.
     [time, data] = getGraphData(index);
@@ -110,7 +155,7 @@ var changeData = function(index) {
     $("#plantName").text(name);
     $("#plantAge").text("Plant age: " + age + " days");
     drawGraph();
-}
+};
 
 var drawGraph = function(){
     var ctx = document.getElementById('graphCavas').getContext('2d');
@@ -155,4 +200,4 @@ var drawGraph = function(){
             }
         }
     });
-}
+};

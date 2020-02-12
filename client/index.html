@@ -42,20 +42,20 @@
         <div class="topPanel">
             <h1 id="plantName">Margarita</h1>
         
-            <h1 id="plantAge">Age: <span>5 days</span></h1>
+            <p id="plantAge">Age: <span>5 days</span></p>
         </div>
         
         <div class="dropdown">
-            <button class="dropbtn">Humidity</button>
-            <div class="dropdown-content">
+            <p id="dropdown_name" class="dropbtn">Humidity</p>
+            <div id="dropdown_options" class="dropdown-content">
               <!--Grafica de la humitat mesurada cada dia-->
-              <a href="#">Humidity</a>
+              <a id="graph_humidity">Humidity</a>
               <!--Grafica de la altura mesurada cada dia-->
-              <a href="#">Grow</a>
+              <a id="graph_grow">Grow</a>
               <!--Grafica de la quantitat d'aigua mesurada cada dia-->
-              <a href="#">Watering</a>
+              <a id="graph_watering">Watering</a>
               <!--Grafica del color de la planta, mesurada cada dia-->
-              <a href="#">Color</a>
+              <a id="graph_color">Color</a>
               <!--Histograma del color de la planta en format d'imatge-->              
             </div>
           </div>
@@ -63,8 +63,8 @@
         <div class="chart-container">
             <canvas id="graphCavas" aria-label="Graph" role="img" ></canvas>
         </div>
-              <div>
-            <div id="informationPanel">
+        <div class="bottomPanelContainer">
+            <div class="informationPanel">
                 <h2 >Graph Statistics</h2>
                 <p id="MinimumValue" class="statistic">Minimum: 1</p>
                 <p id="MaximumValue" class="statistic">Maximum: 1</p>
@@ -73,33 +73,8 @@
                 <p id="MaximumGradientValue" class="statistic">Maximum Gradient: 1</p>
             </div> 
             <img id="gif" src="https://66.media.tumblr.com/d90a47e6589183114fb7170ba5f98146/tumblr_p973flDWVt1syjt2wo1_250.gifv">
-           
-        </div>
-
-
-        <!--<div class="leftPanel">
-
+          </div>
             
-
-            <img id="gif" style="width: 200px;height:auto;" src="https://66.media.tumblr.com/d90a47e6589183114fb7170ba5f98146/tumblr_p973flDWVt1syjt2wo1_250.gifv">
-            <div id="informationPanel">
-                
-                <h2>Data title</h2>
-                <p>Hola</p>
-                <p>Hola</p>
-                <p>Hola</p>
-            </div>
-        </div>
-        <div class="rightPanel">
-            <h1 id="plantAge">Plant age: 5 days</h1>
-            <select id="cars">
-                <option value="">Volvo</option>
-                <option value="saab">Saab</option>
-                <option value="opel">Opel</option>
-                <option value="audi">Audi</option>
-              </select>
-            <canvas id="graphCavas" aria-label="Graph" role="img" ></canvas>
-        </div>-->
     </div>
 
 
@@ -119,14 +94,12 @@
               </p>
               <p>This popup will disapear when the robot <b>recognizes a QR</b>.</p>
               <p>Press <b>Cancel</b> or the <b>cross</b> in the corner to stop adding a plant in the <span> </span> pot.</p>
-              
               <div class="tooltip">What is a QR?
                 <span class="tooltiptext"><p style="margin: 10px;width:50vw">
                   A barcode is a machine-readable optical label that contains information about the item to which it is attached.</p>
               </span>
               </div>
               <p></p>
-              
               <div class="tooltip">Where is the QR located?
                 <span class="tooltiptext"><p style="margin: 10px;white-space: nowrap;">Every seed packet contains a <b>QR</b> code.</p>
                   <p style="margin: 10px;white-space: nowrap;">The <b>QR</b> is located in the back-face of the seed pack.</p> 
