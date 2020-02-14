@@ -13,12 +13,14 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(process.env.PORT || 2000);
 console.log("Server started.");
 
-//SQL Connection
-var SQL_HOST = '188.166.9.142'
-var SQL_USERNAME = 'wee'
-var SQL_PASSWORD = 'weeplant1234'
+//Postgre SQL Connection
+var SQL_HOST = '188.166.9.142';
+var SQL_USERNAME = 'wee';
+var SQL_PASSWORD = 'weeplant1234';
 
-const { Client } = require('pg')
+
+//Note: Using pool improves speed.
+const { Client } = require('pg');
 
 const client = new Client({
     user: SQL_USERNAME,
@@ -26,43 +28,55 @@ const client = new Client({
     database: SQL_USERNAME,
     password: SQL_PASSWORD,
     port: 5432,
-})
+});
 
-//client.connect()
-
-//SQL test querry.
-client.query('SELECT NOW()', (err, res) => {
-    console.log(err, res)
-    client.end()
-})
-
+//Connect to PostgreSQL.
+client.connect();
 
 //SocketIO connection. https://www.npmjs.com/package/websocket
 var io = require('socket.io')(serv, {});
-let s;
 
 io.sockets.on('connection', function(socket) {
-    socket.on("newPot", function(data) {
-        console.log("Request QR code of pot #" + data);
-        socket.broadcast.emit("resp",);
-    });
 
-    socket.on("moveRobot",function(data){
+    socket.on("newPot",function(data){
         console.log("Request QR code of pot #" + data);
-        socket.broadcast.emit("moveRobot",data);
+        socket.broadcast.emit("newPotPython", data);
     });
     
     socket.on("QRReading",function(plant_PK){
-       //Plant PK contains the PK
+        //Plant PK contains the PK
+        console.log("Python QR response. Got the plant PK.\nLooking in db for data.");
 
-        socket.broadcast.emit("moveRobot",data);
+        var plant_packet = {
+            Name:"ERROR",
+            Age:-1
+        };
+
+        //Get Name, calculate Age.
+        client.query(
+            "SELECT DATE_PART('day', timezone('Europe/Madrid',CURRENT_TIMESTAMP) -"+
+            " (SELECT time from plant WHERE plant_id=" + plant_PK + "));",
+            (error, results, fields) => {
+            if(error !== null){
+                console.log("Error in query!");
+                console.log(error);
+            }
+            plant_packet.Age = results.rows[0].date_part;
+            //client.end();
+        });
+       
+       //socket.broadcast.emit("QRReading_frontend", plant_PK);
     });
-    
-    
 });
 
-/*
-const interval = setInterval(function() {
-    // method to be executed;
-    s.emit("resp","asd");
-    }, 1000);*/
+
+//Preguntar al saula com fer l'id.
+var addPlant = function(name,watering_time,moisture_threshold,photo_period){
+    client.query("INSERT INTO plant (plant_id, name, watering_time, moisture_threshold, photo_period, time)"+
+    " VALUES (1, '"+name+"', "+watering_time+", "+moisture_threshold+", "+photo_period+", NOW());",
+    (error, results, fields) => {
+        console.log(error);
+        console.log(results);
+        console.log(fields);
+    });
+};

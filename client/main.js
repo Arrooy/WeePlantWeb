@@ -21,7 +21,8 @@ $(document).ready(function() {
     configModal();
     configDropdownMenu();
     drawGraph();
-    configDropdownHover()
+    configDropdownHover();  
+    configSocketsHandlers();
 });
 
 var configDropdownMenu = function(){
@@ -66,13 +67,13 @@ var configDropdownHover = function(){
             $(".dropdown-content").css("visibility","hidden");
         });
     });
-}
+};
 
 var configIcon = function() {
     
     $("#icon").on('click', function() {
-        $("#mainMenu").css("display", "block");
-        $("#plantMenu").css("display", "none");
+        $("#mainMenu").css("visibility", "visible");
+        $("#plantMenu").css("visibility", "hidden");
     });
 
     $("#icon").hover(function() {
@@ -81,13 +82,21 @@ var configIcon = function() {
         $(this).css("opacity", "1");
     });
 };
+
 var modalClosed = function(modal, trigger){
-    //Elimina el onclick de la tassa.
-    $("#modal__moveRobot").unbind();
+    console.log("MODAL CLOSED");
+
 };
 
 var modalOpened = function(modal, trigger){
     
+};
+
+var configSocketsHandlers = function(){
+    socket.on("QRReading_frontend",function(plant_PK){
+        //Plant PK contains the PK
+        console.log("PK obtained is " + plant_PK);
+    });
 };
 
 var configModal = function(){
@@ -104,30 +113,28 @@ var configPots = function() {
         }, function() {
             $(this).css("opacity", "1");
         });
+        
 
         item.on('click', function() {
             
-            if(item.attr('is_full')){
+            if($(this).attr('is_full') === "false"){
                 
-                $("#modal__moveRobot").on('click',function(){
-                    socket.emit("moveRobot", index);
-                });
-
+                socket.emit("newPot", $(this).attr('number'));            
+                
                 MicroModal.show('modal-1',{
                     onShow: modalOpened,
                     onClose: modalClosed
                 });
 
             }else{
-                changeData(index - 1);
+                changeData($(this).attr('number') - 1);
 
-                $("#mainMenu").css("display", "none");
-                $("#plantMenu").css("display", "inline-block");
+                $("#mainMenu").css("visibility", "hidden");
+                $("#plantMenu").css("visibility", "visible");
             }
         });
     }
 };
-
 
 //Retorna una tupla amb les dades i els instants de temps de cada dada.
 var getGraphData = function(index) {
