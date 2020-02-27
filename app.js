@@ -36,9 +36,12 @@ client.connect();
 //SocketIO connection. https://www.npmjs.com/package/websocket
 var io = require('socket.io')(serv, {});
 
+var workingPot = 0;
+
 io.sockets.on('connection', function(socket) {
 
     socket.on("newPot",function(data){
+        workingPot = data;
         console.log("Request QR code of pot #" + data);
         socket.broadcast.emit("newPotPython", data);
     });
@@ -46,7 +49,7 @@ io.sockets.on('connection', function(socket) {
     socket.on("QRReading",function(plant_PK){
         //Plant PK contains the PK
         console.log("Python QR response. Got the plant PK.\nLooking in db for data.");
-
+    /*
         var plant_packet = {
             Name:"ERROR",
             Age:-1
@@ -64,8 +67,10 @@ io.sockets.on('connection', function(socket) {
             plant_packet.Age = results.rows[0].date_part;
             //client.end();
         });
-       
-       //socket.broadcast.emit("QRReading_frontend", plant_PK);
+       */
+       socket.broadcast.emit("QRReading_frontend", {'pk':plant_PK,
+                                                    'potNumber':workingPot
+                                                    });
     });
 });
 

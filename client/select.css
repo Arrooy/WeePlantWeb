@@ -30,6 +30,20 @@
   z-index: 1;
 }
 
+
+.arrow-down {
+  width: 0; 
+  height: 0; 
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  position: absolute;
+  top: 50%;
+  right: 43%;
+  border-top: 10px solid #FFF8F0;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
 /* Links inside the dropdown */
 .dropdown-content a {
   color: #092327;

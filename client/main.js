@@ -25,6 +25,24 @@ $(document).ready(function() {
     configSocketsHandlers();
 });
 
+//New status can be healty - diseased - dead
+var changePlantStatus = function(newStatus){
+    $('#plantStatus').removeClass("plant-healty");
+    $('#plantStatus').removeClass("plant-diseased");
+    $('#plantStatus').removeClass("plant-death");
+
+    if(newStatus === "healty"){
+        $('#plantStatus').text("Healty");
+        $('#plantStatus').addClass("plant-healty");    
+    }else if(newStatus === "diseased"){
+        $('#plantStatus').text("Diseased");
+        $('#plantStatus').addClass("plant-diseased");    
+    }else{
+        $('#plantStatus').text("Dead");
+        $('#plantStatus').addClass("plant-death");    
+    }
+}
+
 var configDropdownMenu = function(){
     var a = $("#dropdown_options *");
     for(var i = 0; i < a.length; i++){ 
@@ -60,12 +78,7 @@ var configDropdownHover = function(){
         $(".dropdown-content").css("visibility","visible");
     }, function(){
         //Handler hover out
-        $(".dropdown").hover( function(){
-            //Handler hover in
-        },function(){
-            //Handler hover out
-            $(".dropdown-content").css("visibility","hidden");
-        });
+        $(".dropdown-content").css("visibility","hidden");
     });
 };
 
@@ -81,11 +94,11 @@ var configIcon = function() {
     }, function() {
         $(this).css("opacity", "1");
     });
+    
 };
 
 var modalClosed = function(modal, trigger){
     console.log("MODAL CLOSED");
-
 };
 
 var modalOpened = function(modal, trigger){
@@ -93,9 +106,10 @@ var modalOpened = function(modal, trigger){
 };
 
 var configSocketsHandlers = function(){
-    socket.on("QRReading_frontend",function(plant_PK){
+    socket.on("QRReading_frontend",function(pkdict){
         //Plant PK contains the PK
-        console.log("PK obtained is " + plant_PK);
+        console.log("PK obtained is " + pkdict.pk);
+        $('#pot' + pkdict.potNumber).attr('src','/client/Assets/potF'+pkdict.potNumber+'.svg');
     });
 };
 

@@ -10,9 +10,3 @@ PLANT DOCTOR: https://sites.google.com/a/hawaii.edu/leafdoctor/
 PLANTS API
     - https://www.quantitative-plant.org/
 
-
-
-TODO: 
-    Bug dropdown menu. Quan sobre, si no es fa hover de un element de la llista i es posa el ratoli a fora, el dropdown no desapareix.
-    Si es fa desapareixer fent hover sobre un element de la llista i despres a fora, despres el comportament
-    s'arregla i funciona com hauria de ferho. 

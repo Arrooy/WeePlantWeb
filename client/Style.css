@@ -87,7 +87,29 @@ body {
     transform: translateY(-50%);
 }
 
+.plant-healty{
+    background-color: #28a745;
+}
+.plant-diseased{
+    background-color: #dc3545;
+}
+.plant-death{
+    background-color: #343a40;
+}
 
+.badge {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    color: #fff;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
 .chart-container {
     position: relative;
     height: 40vh;

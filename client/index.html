@@ -32,9 +32,9 @@
     <div class="lateralMenu">
         <img id="icon" class="lateralIcon" style="margin-top: 5px;" src="/client/Assets/weeplantICO.png">
         <div class="divPot">
-            <img id="pot1" number="1" class="lateralIcon" is_full="true" style="margin-bottom: 10px;" src="/client/Assets/pot.svg">
-            <img id="pot2" number="2" class="lateralIcon" is_full="false" src="/client/Assets/pot.svg">
-            <img id="pot3" number="3" class="lateralIcon" is_full="false" style="margin-top: 10px;" src="/client/Assets/pot.svg">
+            <img id="pot1" number="1" class="lateralIcon" is_full="true" style="margin-bottom: 10px;" src="/client/Assets/pot1.svg">
+            <img id="pot2" number="2" class="lateralIcon" is_full="false" src="/client/Assets/pot2.svg">
+            <img id="pot3" number="3" class="lateralIcon" is_full="false" style="margin-top: 10px;" src="/client/Assets/pot3.svg">
         </div>
     </div>
     <div id="plantMenu" class="plantMenu">
@@ -42,10 +42,12 @@
             <h1 id="plantName">Margarita</h1>
         
             <p id="plantAge">Age: <span>5 days</span></p>
+            <span class="badge plant-healty" id="plantStatus">Healty</span>
         </div>
         
         <div class="dropdown">
             <p id="dropdown_name" class="dropbtn">Humidity</p>
+            <div class="arrow-down"></div>
             <div id="dropdown_options" class="dropdown-content">
               <!--Grafica de la humitat mesurada cada dia-->
               <a id="graph_humidity">Humidity</a>
