@@ -12,7 +12,7 @@ body {
 }
 
 .logoCenter {
-    visibility: hidden;
+    visibility: visible;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -47,7 +47,7 @@ body {
     width: 94%;
     position: absolute;
     
-    visibility: visible;
+    visibility: hidden;
 
     display: flex;
     flex-flow: column;

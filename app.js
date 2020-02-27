@@ -72,6 +72,13 @@ io.sockets.on('connection', function(socket) {
                                                     'potNumber':workingPot
                                                     });
     });
+    socket.on("getCurrentPlants",function(){
+        
+        socket.emit("getCurrentPlants_RESPONSE",
+        {
+
+        });
+    });
 });
 
 

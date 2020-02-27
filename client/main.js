@@ -1,18 +1,8 @@
 var socket = io();
 
-var time = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-];
-var data = [
-    [0, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5],
-    [5, 5, 5, 4, 4, 3, 3, 3, 3, 2, 2, 2, 1, 0],
-    [0, 1, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
-];
-
-var plantNames = ["Tomates", "Rosa", "Margarita"];
-var plantAges = [5, 10, 20];
+var humidity_data;
+var grow_data;
+var watering_data;
 
 $(document).ready(function() {
 
@@ -23,6 +13,17 @@ $(document).ready(function() {
     drawGraph();
     configDropdownHover();  
     configSocketsHandlers();
+    addCurrentPlants();
+});
+
+
+var addCurrentPlants = function(){
+    socket.emit("getCurrentPlants","");  
+};
+
+
+socket.on("getCurrentPlants_RESPONSE",function(){
+
 });
 
 //New status can be healty - diseased - dead
@@ -41,7 +42,7 @@ var changePlantStatus = function(newStatus){
         $('#plantStatus').text("Dead");
         $('#plantStatus').addClass("plant-death");    
     }
-}
+};
 
 var configDropdownMenu = function(){
     var a = $("#dropdown_options *");
@@ -54,22 +55,8 @@ var dropdownClick = function(event){
     $('#dropdown_name').text(event.data.item[event.data.index].text);
     $(".dropdown-content").css("visibility","hidden");
     var selection = event.data.item[event.data.index];
-    
-    switch(selection.text){
-        case "Humidity":
-            console.log("Humidity!");
-            break;
-        case "Grow":
-            console.log("Grow!");
-            break;
-        case "Watering":
-            console.log("Watering!");
-            break;
-        case "Color":
-            console.log("Color!");
-            break;
-        default:       
-    }
+    var dataset = getData(selection.text);
+    drawGraph(dataset);
 };
 
 var configDropdownHover = function(){
@@ -109,6 +96,7 @@ var configSocketsHandlers = function(){
     socket.on("QRReading_frontend",function(pkdict){
         //Plant PK contains the PK
         console.log("PK obtained is " + pkdict.pk);
+
         $('#pot' + pkdict.potNumber).attr('src','/client/Assets/potF'+pkdict.potNumber+'.svg');
     });
 };
@@ -150,75 +138,103 @@ var configPots = function() {
     }
 };
 
-//Retorna una tupla amb les dades i els instants de temps de cada dada.
-var getGraphData = function(index) {
-    return [time[index], data[index]];
-};
-
 var getName = function(index) {
-    return plantNames[index];
+    return "Ramon";
 };
 
 var getAge = function(index) {
-    return plantAges[index];
+    return "Zero";
 };
 
 var changeData = function(index) {
-    var data, time, name, age;
+    var time, name, age;
 
-    //Get all the data.
-    [time, data] = getGraphData(index);
     name = getName(index);
     age = getAge(index);
-    console.log(name + "" + age);
 
     //Update the view with the new data.
     $("#plantName").text(name);
     $("#plantAge").text("Plant age: " + age + " days");
-    drawGraph();
+
+    var data = getData("Humidity");
+    drawGraph(data);
 };
 
-var drawGraph = function(){
-    var ctx = document.getElementById('graphCavas').getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            maintainAspectRatio:false,
-            tooltips: {
-                mode: 'nearest',
-                intersect: 'false'
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
+var getData = function(dataType){
+    var _label = "Error";
+    var _labels = ["","","","","",""];
+    var _data = [{x:0,y:10},
+                {x:1,y:1}];
+
+    switch(dataType){
+        case "Humidity":
+            console.log("Humidity!");
+            _label = 'Relative humidity';
+            _data = humidity_data;
+            break;
+        case "Grow":
+            console.log("Grow!");
+            _label = 'Plant height';
+            break;
+        case "Watering":
+            console.log("Watering!");
+            _label = 'Amount of water';
+            break;
+        case "Color":
+            console.log("Color!");
+            return "COLOR";
+        default:       
+    }
+    
+    var  data = {
+        labels: _labels,
+        datasets: [{
+            label: _label,
+            data: _data,
+            backgroundColor: [
+                '#0B7A67B0'
+            ],
+            borderColor: [
+                '#0B7A67'
+            ],
+            borderWidth:1
+        }]
+    };
+    return data;
+};
+
+var drawGraph = function(_data_){
+    
+    var canvas = document.getElementById('graphCavas');
+    var ctx = canvas.getContext('2d');
+
+    if(_data_ === "COLOR"){
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "red";
+        ctx.textAlign = "center";
+        ctx.fillText("TODO :)",  canvas.width / 2, canvas.height / 2);
+
+    }else{
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: _data_,
+            options: {
+                maintainAspectRatio:false,
+                tooltips: {
+                    displayColors: false,
+                    mode: 'nearest',
+                    intersect: 'false',
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                }
             }
-        }
-    });
+        });
+    }
 };
