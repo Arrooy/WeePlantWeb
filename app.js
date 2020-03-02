@@ -278,6 +278,7 @@ var createGIF = async function(plants,socket){
     console.log("GIF CREATED");
 
     //Lets get the gif created and send it to the front-end.
+    //TODO: HEADER MUST BE "getCurrentPlants_RESPONSE"
     //socket.emit('image', { image: true, buffer: buf.toString('base64') });
 
 };
