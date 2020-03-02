@@ -3,9 +3,17 @@ var socket = io();
 var humidity_data;
 var grow_data;
 var watering_data;
+var plantData;
+
+//Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
+var plantAdditionSuccessful;
+
+var plantRequestNumber;
 
 $(document).ready(function() {
 
+    plantRequestNumber = 0;
+    
     configIcon();
     configPots();
     configModal();
@@ -14,17 +22,14 @@ $(document).ready(function() {
     configDropdownHover();  
     configSocketsHandlers();
     addCurrentPlants();
+    
 });
 
-
+//Demanem al backend les plantes que hi han.
 var addCurrentPlants = function(){
     socket.emit("getCurrentPlants","");  
 };
 
-
-socket.on("getCurrentPlants_RESPONSE",function(){
-
-});
 
 //New status can be healty - diseased - dead
 var changePlantStatus = function(newStatus){
@@ -85,7 +90,16 @@ var configIcon = function() {
 };
 
 var modalClosed = function(modal, trigger){
-    console.log("MODAL CLOSED");
+    
+    if(plantAdditionSuccessful){
+        console.log("MODAL CLOSED BECAUSE ALL GOOD.");
+
+    }else{
+        console.log("MODAL CLOSED CANCELLING");
+
+        //socket.emit("CANCELL", ""); 
+    }
+    plantAdditionSuccessful = false;
 };
 
 var modalOpened = function(modal, trigger){
@@ -93,16 +107,41 @@ var modalOpened = function(modal, trigger){
 };
 
 var configSocketsHandlers = function(){
-    socket.on("QRReading_frontend",function(pkdict){
+    socket.on("QRReading_frontend", function(pkdict){
         //Plant PK contains the PK
         console.log("PK obtained is " + pkdict.pk);
-
+        plantAdditionSuccessful = true;
         $('#pot' + pkdict.potNumber).attr('src','/client/Assets/potF'+pkdict.potNumber+'.svg');
+        MicroModal.close('modal-1'); 
+
+        plantRequestNumber = pkdict.potNumber;
+        socket.emit("getCurrentPlants","");  
+
+        $("#mainMenu").css("visibility", "hidden");
+        $("#plantMenu").css("visibility", "visible");
+        
+    });
+   
+    //El backend respon amb les dades de les plantes.
+    socket.on("getCurrentPlants_RESPONSE",function(data){
+        plantData = data;
+        console.log(data);
+        data.forEach(function(item, index){
+            $('#pot' + item.pot_number).attr('is_full',true);
+            $('#pot' + item.pot_number).attr('src','/client/Assets/potF' + item.pot_number + '.svg');
+        });
+        console.log("RESPONSE!");
+        if(plantRequestNumber === 0){
+            changeData(0);
+        }else{
+            changeData(plantRequestNumber - 1);
+        }
+        
+        plantRequestNumber = 0;
     });
 };
 
 var configModal = function(){
-    
     MicroModal.init();
 };
 
@@ -139,18 +178,22 @@ var configPots = function() {
 };
 
 var getName = function(index) {
-    return "Ramon";
+    return plantData[index].name;
 };
 
 var getAge = function(index) {
     return "Zero";
 };
 
+
 var changeData = function(index) {
     var time, name, age;
-
-    name = getName(index);
-    age = getAge(index);
+    
+    if(index >= plantData.length) 
+        return;
+    console.log(plantData);
+    name = plantData[index].name;
+    age = plantData[index].age;
 
     //Update the view with the new data.
     $("#plantName").text(name);
@@ -238,3 +281,13 @@ var drawGraph = function(_data_){
         });
     }
 };
+
+/*
+
+$(document).keypress(function(e) {
+    if(e.which == 13) {
+        
+        console.log("CLOSING MODAL WITH KEIBOARD.");
+       
+    }
+  });*/
