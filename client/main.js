@@ -5,6 +5,7 @@ var grow_data;
 var watering_data;
 var plantData;
 
+
 //Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
 var plantAdditionSuccessful;
 
