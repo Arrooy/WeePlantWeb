@@ -1,4 +1,10 @@
+
 //DEPS: GIFEncoder.
+
+//Connect SSH:
+//ssh wee@188.166.9.142
+//Password: weeplant1234
+
 var express = require('express');
 
 var app = express();
@@ -46,6 +52,13 @@ io.sockets.on('connection', function(socket) {
         socket.broadcast.emit("newPotPython", data);
     });
     
+    //TODO: ACABAR AIXO. ENLLAÇARHO AMB PYTHON I ROS.
+    socket.on("newPot_CANCELL",function(data){
+        workingPot = -1;
+        console.log("Request QR code of pot is cancelled!");
+        socket.broadcast.emit("newPotPython_CANCELL", data);
+    });
+    
     socket.on("QRReading",function(plant_PK){
         //Plant PK contains the PK
         console.log("Python QR response. Got the plant PK.");
@@ -69,10 +82,11 @@ io.sockets.on('connection', function(socket) {
             //client.end();
         });
        */
-       socket.broadcast.emit("QRReading_frontend", {'pk':plant_PK,
+
+       //NOTA: AQUI ESTAVA POSAT UN BROADCAST i lhe modificat!
+       socket.emit("QRReading_frontend", {'pk':plant_PK,
                                                     'potNumber':workingPot
                                                     });
-    
     });
 
     socket.on("getCurrentPlants",function(){
@@ -118,7 +132,7 @@ var continueWithDates = async function(plants, socket){
     var plantHumidity = [];
     var plantGrow = [];
     var plantColor = [];
-    var plantGIF = []; // TODO.
+    var plantWatering = [];
 
     plants.forEach(element => {
         console.log("Getting from id" + element.plant_id);
@@ -138,7 +152,7 @@ var continueWithDates = async function(plants, socket){
 
         //Get Humidity values
         client.query(
-            "SELECT time,plant_id,value FROM humidity where plant_id=" + element.plant_id+";",
+            "SELECT time, value FROM humidity where plant_id=" + element.plant_id+";",
             (error, results, fields) => {
             if(error !== null){
                 console.log("Error in query!");
@@ -151,7 +165,7 @@ var continueWithDates = async function(plants, socket){
 
          //Get Grow values
          client.query(
-            "SELECT height FROM imatge where plant_id=" + element.plant_id+";",
+            "SELECT time,height FROM imatge where plant_id=" + element.plant_id+";",
             (error, results, fields) => {
             if(error !== null){
                 console.log("Error in query!");
@@ -164,14 +178,27 @@ var continueWithDates = async function(plants, socket){
 
          //Get Color values
          client.query(
-            "SELECT colour FROM imatge where plant_id=" + element.plant_id+";",
+            "SELECT time,colour FROM imatge where plant_id=" + element.plant_id+";",
             (error, results, fields) => {
             if(error !== null){
                 console.log("Error in query!");
                 console.log(error);
             }else{
                 console.log("\tColor Query done.")
-                plantColor.push({"pk":element.plant_id,"colorValues":results.rows});
+                plantColor.push({"pk":element.plant_id,"colourValues":results.rows});
+            }
+        });
+
+        //Get Watering values
+        client.query(
+            "SELECT time, water_applied FROM watering where plant_id=" + element.plant_id+";",
+            (error, results, fields) => {
+            if(error !== null){
+                console.log("Error in query!");
+                console.log(error);
+            }else{
+                console.log("\tWatering Query done.");
+                plantWatering.push({"pk":element.plant_id,"wateringValues":results.rows});
             }
         });
     });
@@ -180,38 +207,45 @@ var continueWithDates = async function(plants, socket){
           || plantHumidity.length !== plants.length 
           || plantGrow.length !== plants.length 
           || plantColor.length !== plants.length
+          || plantWatering.length !== plants.length
         ){
         await sleep(100);
     }
     
     plants.forEach(element => {
-        plantAge.forEach(element2 =>{
-            if(element2.pk == element.plant_id){
-                element.age = element2.age;
+        plantAge.forEach(element1 =>{
+            if(element1.pk == element.plant_id){
+                element.age = element1.age;
             }
         });
         
-        plantHumidity.forEach(element3 =>{
-            if(element3.pk == element.plant_id){
-                element.humidityValues = element3.humidityValues;
+        plantHumidity.forEach(element1 =>{
+            if(element1.pk == element.plant_id){
+                element.humidityValues = element1.humidityValues;
             }
         });
         
-        plantGrow.forEach(element4 =>{
-            if(element4.pk == element.plant_id){
-                element.growValues = element4.growValues;
+        plantGrow.forEach(element1 =>{
+            if(element1.pk == element.plant_id){
+                element.growValues = element1.growValues;
             }
         });
         
-        plantColor.forEach(element5 =>{
-            if(element5.pk == element.plant_id){
-                element.colorValues = element5.colorValues;
+        plantColor.forEach(element1 =>{
+            if(element1.pk == element.plant_id){
+                element.colourValues = element1.colourValues;
             }
         });
+        
+        plantWatering.forEach(element1 =>{
+            if(element1.pk == element.plant_id){
+                element.wateringValues = element1.wateringValues;
+            }
+        });
+
     });
     
-    console.log(plants);
-   // createGIF(plants,socket);
+    createGIF(plants,socket);
 };
 
 
@@ -219,12 +253,30 @@ const GIFEncoder = require('gifencoder');
 const { createCanvas, Image } = require('canvas');
 const fs = require('fs');
 
-//Nota: Suposant que imatge es base64 i PNG
+
 var createGIF = async function(plants,socket){
     console.log("Getting images from DB.");
-    var images = [];
     
-    plants.forEach(element => {
+    //Busquem el nombre de fotos total de la db.
+    client.query(
+        "SELECT count(image) FROM imatge;",
+        (error, results, fields) => {
+        if(error !== null){
+            console.log("Error in query!");
+            console.log(error);
+        }else{
+            
+            continueWithGIF(plants, results.rows[0].count, socket);
+        }
+    });    
+   
+};
+
+var continueWithGIF = async function(plants, numberOfPhotos, socket){
+    var gifImages = [];
+    var countImages = 0;
+    
+     plants.forEach(element => {
         //Get images values
         client.query(
             "SELECT image FROM imatge where plant_id=" +  element.plant_id + ";",
@@ -233,58 +285,80 @@ var createGIF = async function(plants,socket){
                 console.log("Error in query!");
                 console.log(error);
             }else{
-                ///console.log(results.rows);
-                (results.rows).forEach(element2,index =>{
+                
+                (results.rows).forEach(element2 =>{
+                    
                     var image = new Image();
                     image.onload = function() {
-                        images.push({"pk":element.plant_id,"image":image});
-                        console.log("From pk " + element.plant_id + "Image" + index + " added.");
+                        countImages++;
+                        if(gifImages[element.plant_id] == undefined){
+                            gifImages[element.plant_id] = [image];  
+                        }else{
+                            gifImages[element.plant_id].push(image);
+                        }
                     };
-                    image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=='
-                    //TODO EDIT THIS!
-                    //image.src = 'data:image/png;base64,' + element2;
-                });
+                    image.src = 'data:image/jpg;base64,' + element2.image;
+                }); 
             }
         });       
     });
-    var helper = -1;
-    //TODO: THINK THIS HARDER
-    //Ara si pasa 1 seg sense rebre images, tira cap a la creacio del gif.
-    while(images.length !== helper){
-      helper = images.length;
-      await sleep(1000);
-    }
-  
-    //Now lets actually create the gif.    
-    const encoder = new GIFEncoder(320, 240);
-    // stream the results as they are available into myanimated.gif
-    encoder.createReadStream().pipe(fs.createWriteStream('myanimated.gif'));
 
-    encoder.start();
-    encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-    encoder.setDelay(1000);  // frame delay in ms
-    encoder.setQuality(10); // image quality. 10 is default.
- 
-    // use node-canvas
-    const canvas = createCanvas(320, 240);
-    const ctx = canvas.getContext('2d');
     
-    images.forEach(element =>{
-        ctx.drawImage(element.image, 0, 0);
-        encoder.addFrame(ctx);
+    while(numberOfPhotos !=  countImages){
+      await sleep(100);
+    }
+
+    console.log("FOTOS DONE. ID 1 has " + gifImages[1].length);
+    var stream =  [];
+    var fileSaved = 0;
+    gifImages.forEach(function(element,index){
+
+        //Now lets actually create the gif.    
+        const encoder = new GIFEncoder(320, 240);
+        
+        // stream the results as they are available into myanimated.gif
+        stream[index] = encoder.createReadStream().pipe(fs.createWriteStream('./gifs/myanimated' + index + '.gif'));
+
+        stream[index].on('finish', () => {
+            fileSaved++;
+        });
+
+        encoder.start();
+        encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
+        encoder.setDelay(300);  // frame delay in ms
+        encoder.setQuality(10); // image quality. 10 is default.
+    
+        // use node-canvas
+        const canvas = createCanvas(320, 240);
+        const ctx = canvas.getContext('2d');
+        
+        element.forEach(element2 =>{
+            ctx.drawImage(element2, 0, 0);
+            encoder.addFrame(ctx);
+        });
+        
+        encoder.finish();
+
+        console.log("GIF CREATED");
+    });
+
+
+    while(fileSaved != 3){
+        await sleep(100);
+    }
+
+    var index = 0;
+    
+    plants.forEach(element =>{
+        index++;
+        element.gif = 'data:image/gif;base64,' + fs.readFileSync('./gifs/myanimated' + (index) + '.gif',{encoding:"BASE64"});
     });
     
-    encoder.finish();
-    console.log("GIF CREATED");
-
     //Lets get the gif created and send it to the front-end.
-    //TODO: HEADER MUST BE "getCurrentPlants_RESPONSE"
-    //socket.emit('image', { image: true, buffer: buf.toString('base64') });
-
+    socket.emit('getCurrentPlants_RESPONSE', plants);
 };
 
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
+}

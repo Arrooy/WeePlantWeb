@@ -2,9 +2,10 @@ var socket = io();
 
 var humidity_data;
 var grow_data;
-var watering_data;
-var plantData;
+var colourValues;
+var wateringValues;
 
+var plantsData;
 
 //Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
 var plantAdditionSuccessful;
@@ -22,32 +23,15 @@ $(document).ready(function() {
     drawGraph();
     configDropdownHover();  
     configSocketsHandlers();
+    
     addCurrentPlants();
     
 });
 
 //Demanem al backend les plantes que hi han.
 var addCurrentPlants = function(){
+    //El backend contestara amb getCurrentPlants_RESPONSE
     socket.emit("getCurrentPlants","");  
-};
-
-
-//New status can be healty - diseased - dead
-var changePlantStatus = function(newStatus){
-    $('#plantStatus').removeClass("plant-healty");
-    $('#plantStatus').removeClass("plant-diseased");
-    $('#plantStatus').removeClass("plant-death");
-
-    if(newStatus === "healty"){
-        $('#plantStatus').text("Healty");
-        $('#plantStatus').addClass("plant-healty");    
-    }else if(newStatus === "diseased"){
-        $('#plantStatus').text("Diseased");
-        $('#plantStatus').addClass("plant-diseased");    
-    }else{
-        $('#plantStatus').text("Dead");
-        $('#plantStatus').addClass("plant-death");    
-    }
 };
 
 var configDropdownMenu = function(){
@@ -61,45 +45,21 @@ var dropdownClick = function(event){
     $('#dropdown_name').text(event.data.item[event.data.index].text);
     $(".dropdown-content").css("visibility","hidden");
     var selection = event.data.item[event.data.index];
+    
+    //S'actualitza les dades de la grafica amb les dades obtingudes amb getCurrentPlants_RESPONSE.
     var dataset = getData(selection.text);
     drawGraph(dataset);
-};
-
-var configDropdownHover = function(){
-    $(".dropdown").hover( function(){
-        //Handler hover in
-        $(".dropdown-content").css("visibility","visible");
-    }, function(){
-        //Handler hover out
-        $(".dropdown-content").css("visibility","hidden");
-    });
-};
-
-var configIcon = function() {
-    
-    $("#icon").on('click', function() {
-        $("#mainMenu").css("visibility", "visible");
-        $("#plantMenu").css("visibility", "hidden");
-    });
-
-    $("#icon").hover(function() {
-        $(this).css("opacity", "0.75");
-    }, function() {
-        $(this).css("opacity", "1");
-    });
-    
 };
 
 var modalClosed = function(modal, trigger){
     
     if(plantAdditionSuccessful){
-        console.log("MODAL CLOSED BECAUSE ALL GOOD.");
-
+        console.log("Modal closed. New plant added ok.");
     }else{
-        console.log("MODAL CLOSED CANCELLING");
-
+        console.log("Modal closed due to user intervention.");
         //socket.emit("CANCELL", ""); 
     }
+
     plantAdditionSuccessful = false;
 };
 
@@ -120,21 +80,23 @@ var configSocketsHandlers = function(){
 
         $("#mainMenu").css("visibility", "hidden");
         $("#plantMenu").css("visibility", "visible");
-        
     });
    
     //El backend respon amb les dades de les plantes.
     socket.on("getCurrentPlants_RESPONSE",function(data){
-        plantData = data;
+        
+        plantsData = data;
+        
+
+        console.log("Got updated data from the backend!");
         console.log(data);
+
         data.forEach(function(item, index){
             $('#pot' + item.pot_number).attr('is_full',true);
             $('#pot' + item.pot_number).attr('src','/client/Assets/potF' + item.pot_number + '.svg');
         });
-        console.log("RESPONSE!");
-        if(plantRequestNumber === 0){
-            changeData(0);
-        }else{
+        
+        if(plantRequestNumber != 0){
             changeData(plantRequestNumber - 1);
         }
         
@@ -160,7 +122,7 @@ var configPots = function() {
         item.on('click', function() {
             
             if($(this).attr('is_full') === "false"){
-                
+                //Espera la resposta del backend QRReading_frontend
                 socket.emit("newPot", $(this).attr('number'));            
                 
                 MicroModal.show('modal-1',{
@@ -178,28 +140,26 @@ var configPots = function() {
     }
 };
 
-var getName = function(index) {
-    return plantData[index].name;
-};
-
-var getAge = function(index) {
-    return "Zero";
-};
-
 
 var changeData = function(index) {
-    var time, name, age;
     
-    if(index >= plantData.length) 
+    if(index >= plantsData.length)
         return;
-    console.log(plantData);
-    name = plantData[index].name;
-    age = plantData[index].age;
 
     //Update the view with the new data.
-    $("#plantName").text(name);
-    $("#plantAge").text("Plant age: " + age + " days");
+    $("#plantName").text(plantsData[index].name);
+    $("#plantAge").text("Plant age: " + plantsData[index].age + " days");
+    $("#gif").attr('src',plantsData[index].gif);
 
+
+    humidity_data = plantsData[index].humidityValues;
+    grow_data = plantsData[index].growValues;
+    colourValues = plantsData[index].colourValues;
+
+    console.log("Date testing area:");
+    var d = new Date(humidity_data[0].time);
+    console.log(d);
+    
     var data = getData("Humidity");
     drawGraph(data);
 };
@@ -224,13 +184,14 @@ var getData = function(dataType){
             console.log("Watering!");
             _label = 'Amount of water';
             break;
-        case "Color":
+        case "Colour":
             console.log("Color!");
             return "COLOR";
         default:       
     }
     
-    var  data = {
+    //Uau.
+    return {
         labels: _labels,
         datasets: [{
             label: _label,
@@ -244,7 +205,6 @@ var getData = function(dataType){
             borderWidth:1
         }]
     };
-    return data;
 };
 
 var drawGraph = function(_data_){
@@ -283,6 +243,49 @@ var drawGraph = function(_data_){
     }
 };
 
+
+//** VISUAL FUNCTIONS **/
+var configDropdownHover = function(){
+    $(".dropdown").hover( function(){
+        //Handler hover in
+        $(".dropdown-content").css("visibility","visible");
+    }, function(){
+        //Handler hover out
+        $(".dropdown-content").css("visibility","hidden");
+    });
+};
+var configIcon = function() {
+    
+    $("#icon").on('click', function() {
+        $("#mainMenu").css("visibility", "visible");
+        $("#plantMenu").css("visibility", "hidden");
+    });
+
+    $("#icon").hover(function() {
+        $(this).css("opacity", "0.75");
+    }, function() {
+        $(this).css("opacity", "1");
+    });
+    
+};
+//New status can be healty - diseased - dead
+var changePlantStatus = function(newStatus){
+    $('#plantStatus').removeClass("plant-healty");
+    $('#plantStatus').removeClass("plant-diseased");
+    $('#plantStatus').removeClass("plant-death");
+
+    if(newStatus === "healty"){
+        $('#plantStatus').text("Healty");
+        $('#plantStatus').addClass("plant-healty");    
+    }else if(newStatus === "diseased"){
+        $('#plantStatus').text("Diseased");
+        $('#plantStatus').addClass("plant-diseased");    
+    }else{
+        $('#plantStatus').text("Dead");
+        $('#plantStatus').addClass("plant-death");    
+    }
+};
+
 /*
 
 $(document).keypress(function(e) {
@@ -291,4 +294,6 @@ $(document).keypress(function(e) {
         console.log("CLOSING MODAL WITH KEIBOARD.");
        
     }
-  });*/
+});
+
+*/

@@ -4,7 +4,7 @@ body {
     height: 100vh;
     margin: 0px;
     overflow-x: hidden;
-    /*overflow-y: hidden;*/
+    overflow-y: hidden;
     color: #FFF8F0;
 
     font-family: 'Montserrat';
