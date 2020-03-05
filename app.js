@@ -12,6 +12,14 @@ var serv = require('http').Server(app);
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
+    
+   /*
+    var url = require('url');
+    var url_parts = url.parse(req.url, true);
+    var query = url_parts.query;
+    console.log(query);
+    */
+//    res.redirect('/');
 });
 
 app.use('/client', express.static(__dirname + '/client'));
@@ -333,7 +341,7 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
         const ctx = canvas.getContext('2d');
         
         element.forEach(element2 =>{
-            ctx.drawImage(element2, 0, 0);
+            ctx.drawImage(element2, 0, 0,320,240);
             encoder.addFrame(ctx);
         });
         
