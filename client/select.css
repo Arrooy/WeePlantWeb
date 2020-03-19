@@ -8,7 +8,7 @@
   text-align: center;
   font-size: 1.2rem;
   border: none;
-  width: inherit;
+  width: -webkit-fill-available;
 }
 
 /* The container <div> - needed to position the dropdown content */
@@ -29,7 +29,6 @@
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }
-
 
 .arrow-down {
   width: 0; 

@@ -1,11 +1,15 @@
 var socket = io();
 
-var humidity_data;
-var grow_data;
-var colourValues;
-var wateringValues;
-
+//All the data about the plants.
 var plantsData;
+
+//Graph data from plantsData.
+var humidity_data = [];
+var grow_data = [];
+var colour_data = [];
+var watering_data = [];
+
+var db_loaded;
 
 //Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
 var plantAdditionSuccessful;
@@ -48,6 +52,7 @@ var dropdownClick = function(event){
     
     //S'actualitza les dades de la grafica amb les dades obtingudes amb getCurrentPlants_RESPONSE.
     var dataset = getData(selection.text);
+    console.log("REquesting: "+  selection.text);
     drawGraph(dataset);
 };
 
@@ -87,9 +92,13 @@ var configSocketsHandlers = function(){
         
         plantsData = data;
         
+        db_loaded = true;
+        MicroModal.close('modal-2');
 
         console.log("Got updated data from the backend!");
         console.log(data);
+
+        
 
         data.forEach(function(item, index){
             $('#pot' + item.pot_number).attr('is_full',true);
@@ -105,7 +114,9 @@ var configSocketsHandlers = function(){
 };
 
 var configModal = function(){
+    db_loaded = false;
     MicroModal.init();
+    MicroModal.show('modal-2');
 };
 
 var configPots = function() {
@@ -152,21 +163,49 @@ var changeData = function(index) {
     $("#gif").attr('src',plantsData[index].gif);
 
 
-    humidity_data = plantsData[index].humidityValues;
-    grow_data = plantsData[index].growValues;
-    colourValues = plantsData[index].colourValues;
-
-    console.log("Date testing area:");
-    var d = new Date(humidity_data[0].time);
-    console.log(d);
+    var humidity_data_aux = plantsData[index].humidityValues;
+    var grow_data_aux  = plantsData[index].growValues;
+    //TODO
+    var colour_data_aux = plantsData[index].colourValues;
+    var watering_data_aux = plantsData[index].wateringValues;
     
+    //Clear array.
+    humidity_data = [];
+    //Add data with new format
+    humidity_data_aux.forEach(function(element,index){
+        if(index != 0){
+            var d = new Date(element.time);
+            humidity_data.push({x:d.getSeconds() + d.getMinutes() * 60,y:element.value});
+        }
+    });
+    
+    //Clear array.
+    grow_data = [];
+    //Add data with new format
+    grow_data_aux.forEach(function(element,index){
+        if(index != 0){
+            var d = new Date(element.time);
+            grow_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.height});
+        }
+    });
+
+    //Clear array.
+    watering_data = [];
+    //Add data with new format
+    watering_data_aux.forEach(function(element,index){
+        if(index != 0){
+            var d = new Date(element.time);
+            watering_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.water_applied});
+        }
+    });
+
     var data = getData("Humidity");
     drawGraph(data);
 };
 
 var getData = function(dataType){
     var _label = "Error";
-    var _labels = ["","","","","",""];
+    var _labels = [];
     var _data = [{x:0,y:10},
                 {x:1,y:1}];
 
@@ -174,15 +213,19 @@ var getData = function(dataType){
         case "Humidity":
             console.log("Humidity!");
             _label = 'Relative humidity';
+            
             _data = humidity_data;
             break;
         case "Grow":
             console.log("Grow!");
             _label = 'Plant height';
+
+            _data = grow_data;
             break;
         case "Watering":
             console.log("Watering!");
             _label = 'Amount of water';
+            _data = watering_data;
             break;
         case "Colour":
             console.log("Color!");
@@ -190,6 +233,40 @@ var getData = function(dataType){
         default:       
     }
     
+    var values = [];
+    
+    _data.forEach(element=>{
+        _labels.push("");
+        values.push(element.y);        
+    });
+
+    const arrMax = Math.max(...values);
+    const arrMin = Math.min(...values);
+    const arrAvg = values.reduce((a,b) => a + b, 0) / values.length;
+
+    $("#MinimumValue").text("Minimum: " + arrMin);
+    $("#MaximumValue").text("Maximum: " + arrMax);
+    $("#AverageValue").text("Average: " + arrAvg);
+    
+    var maxGradient = 0;
+    var minGradient = Infinity;
+    var i;
+    console.log("Length of data is " + _data.length);
+    for(i = 0; i < _data.length - 1; i ++){
+        var grad;
+        grad = (_data[i + 1].y - _data[i].y) / (_data[i + 1].x - _data[i].x);
+        console.log("Grad: " + grad);
+        if(grad > maxGradient) maxGradient = grad;
+        else if(grad < minGradient) minGradient = grad;
+    }
+    
+    console.log("MaxGrad = " + maxGradient + "\nMinGrad = " + minGradient);
+
+    $("#MinimumGradientValue").text("Biggest negative slope change: " + minGradient);
+    $("#MaximumGradientValue").text("Biggest positive slope change: " + maxGradient);
+    
+
+
     //Uau.
     return {
         labels: _labels,
@@ -231,13 +308,19 @@ var drawGraph = function(_data_){
                     mode: 'nearest',
                     intersect: 'false',
                 },
+                xAxes: [{
+                    ticks: {
+                        
+                        suggestedMax: 100
+                    }
+                }]/*,
                 scales: {
                     yAxes: [{
                         ticks: {
                             beginAtZero: true
                         }
                     }],
-                }
+                }*/
             }
         });
     }
@@ -286,14 +369,8 @@ var changePlantStatus = function(newStatus){
     }
 };
 
-/*
-
-$(document).keypress(function(e) {
-    if(e.which == 13) {
-        
-        console.log("CLOSING MODAL WITH KEIBOARD.");
-       
+$(document).keydown(function (event) {
+    if (event.keyCode === 27 && db_loaded === false) {
+      event.stopImmediatePropagation();
     }
 });
-
-*/
