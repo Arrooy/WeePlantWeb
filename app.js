@@ -10,14 +10,26 @@ var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 
+var web_args;
+
+var shouldIOpenAPot = false;
+//www.weeplant.es:80/?name=deictics_plant&pot_number=404&watering_time=10&moisture_threshold=.2&moisture_period=60&photo_period=500"""
+
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
     
     var url = require('url');
     var url_parts = url.parse(req.url, true);
-    var query = url_parts.query;
-    console.log(query);
-//    res.redirect('/');
+    web_args = url_parts.query;
+    var len = Object.keys(web_args).length;
+    
+    
+    if(len != 0){
+        console.log("ARGS: \n");
+        console.log(web_args);
+        shouldIOpenAPot = true;
+        res.redirect('/');
+    }
 });
 
 app.use('/client', express.static(__dirname + '/client'));
@@ -51,18 +63,25 @@ var io = require('socket.io')(serv, {});
 var workingPot = 0;
 
 io.sockets.on('connection', function(socket) {
+    
+    socket.on("shouldIOpenAPot",function(data){
+        if(shouldIOpenAPot === true){
+            socket.emit('shouldIOpenAPot_RESPONSE',{
+                'potNumber':web_args.pot_number
+            });
+        }
+    });
 
     socket.on("newPot",function(data){
         workingPot = data;
         console.log("Request QR code of pot #" + data);
-        socket.broadcast.emit("newPotPython", data);
+        socket.broadcast.emit("[ADD_PLANT]", data);
     });
     
-    //TODO: ACABAR AIXO. ENLLAÇARHO AMB PYTHON I ROS.
     socket.on("newPot_CANCELL",function(data){
         workingPot = -1;
         console.log("Request QR code of pot is cancelled!");
-        socket.broadcast.emit("newPotPython_CANCELL", data);
+        socket.broadcast.emit("[ABORT_PLANT]", data);
     });
     
     socket.on("QRReading",function(plant_PK){

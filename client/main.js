@@ -11,6 +11,8 @@ var watering_data = [];
 
 var db_loaded;
 
+var myChart;
+
 //Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
 var plantAdditionSuccessful;
 
@@ -23,9 +25,8 @@ $(document).ready(function() {
     configIcon();
     configPots();
     configModal();
+    configDropdown();  
     configDropdownMenu();
-    drawGraph();
-    configDropdownHover();  
     configSocketsHandlers();
     
     addCurrentPlants();
@@ -35,7 +36,8 @@ $(document).ready(function() {
 //Demanem al backend les plantes que hi han.
 var addCurrentPlants = function(){
     //El backend contestara amb getCurrentPlants_RESPONSE
-    socket.emit("getCurrentPlants","");  
+    socket.emit("getCurrentPlants","");
+    socket.emit("shouldIOpenAPot");
 };
 
 var configDropdownMenu = function(){
@@ -47,12 +49,15 @@ var configDropdownMenu = function(){
 
 var dropdownClick = function(event){
     $('#dropdown_name').text(event.data.item[event.data.index].text);
+    
     $(".dropdown-content").css("visibility","hidden");
+
+
     var selection = event.data.item[event.data.index];
     
     //S'actualitza les dades de la grafica amb les dades obtingudes amb getCurrentPlants_RESPONSE.
     var dataset = getData(selection.text);
-    console.log("REquesting: "+  selection.text);
+    console.log("Requesting: "+  selection.text);
     drawGraph(dataset);
 };
 
@@ -85,6 +90,16 @@ var configSocketsHandlers = function(){
 
         $("#mainMenu").css("visibility", "hidden");
         $("#plantMenu").css("visibility", "visible");
+    });
+
+    socket.on("shouldIOpenAPot_RESPONSE",function(data){
+        console.log("Someone scanned pot number " + data);
+        plantsData.forEach(element=>{
+            if(element.pot_number === data.potNumber){
+                //TOODO:
+                console.log("THE ELEMENT SCANNED WITH PHONE IS LOADED. WE CAN DISPLAY IT.");
+            }
+        });
     });
    
     //El backend respon amb les dades de les plantes.
@@ -162,7 +177,7 @@ var changeData = function(index) {
     $("#plantAge").text("Plant age: " + plantsData[index].age + " days");
     $("#gif").attr('src',plantsData[index].gif);
 
-
+    _data
     var humidity_data_aux = plantsData[index].humidityValues;
     var grow_data_aux  = plantsData[index].growValues;
     //TODO
@@ -229,7 +244,8 @@ var getData = function(dataType){
             break;
         case "Colour":
             console.log("Color!");
-            return "COLOR";
+            return createColorGraph();
+            
         default:       
     }
     
@@ -250,17 +266,13 @@ var getData = function(dataType){
     
     var maxGradient = 0;
     var minGradient = Infinity;
-    var i;
-    console.log("Length of data is " + _data.length);
-    for(i = 0; i < _data.length - 1; i ++){
+    
+    for(var i = 0; i < _data.length - 1; i ++){
         var grad;
         grad = (_data[i + 1].y - _data[i].y) / (_data[i + 1].x - _data[i].x);
-        console.log("Grad: " + grad);
         if(grad > maxGradient) maxGradient = grad;
         else if(grad < minGradient) minGradient = grad;
     }
-    
-    console.log("MaxGrad = " + maxGradient + "\nMinGrad = " + minGradient);
 
     $("#MinimumGradientValue").text("Biggest negative slope change: " + minGradient);
     $("#MaximumGradientValue").text("Biggest positive slope change: " + maxGradient);
@@ -284,21 +296,58 @@ var getData = function(dataType){
     };
 };
 
+
+var createColorGraph = function(){
+    
+    return{
+        labels: _labels,
+        datasets: [
+            //RED
+            {
+            label: _label,
+            data: _data,
+            backgroundColor: [
+                '#0B7A67B0'
+            ],
+            borderColor: [
+                '#0B7A67'
+            ],
+            borderWidth:1
+        },
+        //GREEN
+        {
+            label: _label,
+            data: _data,
+            backgroundColor: [
+                '#0B7A67B0'
+            ],
+            borderColor: [
+                '#0B7A67'
+            ],
+            borderWidth:1
+        },
+        //BLUE
+        {
+            label: _label,
+            data: _data,
+            backgroundColor: [
+                '#0B7A67B0'
+            ],
+            borderColor: [
+                '#0B7A67'
+            ],
+            borderWidth:1
+        }]
+    };
+};
+
 var drawGraph = function(_data_){
     
     var canvas = document.getElementById('graphCavas');
     var ctx = canvas.getContext('2d');
-
-    if(_data_ === "COLOR"){
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = "30px Arial";
-        ctx.fillStyle = "red";
-        ctx.textAlign = "center";
-        ctx.fillText("TODO :)",  canvas.width / 2, canvas.height / 2);
-
-    }else{
-        var myChart = new Chart(ctx, {
+    
+    if(myChart === undefined){
+        myChart = new Chart(ctx, {
             type: 'line',
             data: _data_,
             options: {
@@ -307,13 +356,13 @@ var drawGraph = function(_data_){
                     displayColors: false,
                     mode: 'nearest',
                     intersect: 'false',
-                },
+                }/*,
                 xAxes: [{
                     ticks: {
                         
                         suggestedMax: 100
                     }
-                }]/*,
+                }],
                 scales: {
                     yAxes: [{
                         ticks: {
@@ -323,12 +372,17 @@ var drawGraph = function(_data_){
                 }*/
             }
         });
+    }else{
+        //Chart needs an update:
+        myChart.data = _data_;
+        myChart.update();
     }
+    
 };
 
 
 //** VISUAL FUNCTIONS **/
-var configDropdownHover = function(){
+var configDropdown = function(){
     $(".dropdown").hover( function(){
         //Handler hover in
         $(".dropdown-content").css("visibility","visible");
@@ -337,6 +391,8 @@ var configDropdownHover = function(){
         $(".dropdown-content").css("visibility","hidden");
     });
 };
+
+
 var configIcon = function() {
     
     $("#icon").on('click', function() {
