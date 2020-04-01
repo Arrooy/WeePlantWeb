@@ -175,11 +175,11 @@ var changeData = function(index) {
     $("#plantAge").text("Plant age: " + plantsData[index].age + " days");
     $("#gif").attr('src',plantsData[index].gif);
 
-    
+
     var humidity_data_aux = plantsData[index].humidityValues;
     var grow_data_aux  = plantsData[index].growValues;
-    //TODO
-    var colour_data_aux = plantsData[index].colourValues;
+    
+    colour_data = plantsData[index].colourValues[plantsData[index].colourValues.length - 1];
     var watering_data_aux = plantsData[index].wateringValues;
     
     //Clear array.
@@ -243,7 +243,6 @@ var getData = function(dataType){
         case "Colour":
             console.log("Color!");
             return createColorGraph();
-            
         default:       
     }
     
@@ -274,8 +273,6 @@ var getData = function(dataType){
 
     $("#MinimumGradientValue").text("Biggest negative slope change: " + minGradient);
     $("#MaximumGradientValue").text("Biggest positive slope change: " + maxGradient);
-    
-
 
     //Uau.
     return {
@@ -297,13 +294,19 @@ var getData = function(dataType){
 
 var createColorGraph = function(){
     
+    colour_data.colour[0].forEach(element=>{
+        _labels.push("");
+        values.push(element.y);
+    });
+
+
     return{
         labels: _labels,
         datasets: [
             //RED
             {
-            label: _label,
-            data: _data,
+            label: "Red",
+            data: colour_data.colour[0],
             backgroundColor: [
                 '#0B7A67B0'
             ],
@@ -311,10 +314,10 @@ var createColorGraph = function(){
                 '#0B7A67'
             ],
             borderWidth:1
-        },
+        }/*,
         //GREEN
         {
-            label: _label,
+            label: "Green",
             data: _data,
             backgroundColor: [
                 '#0B7A67B0'
@@ -326,7 +329,7 @@ var createColorGraph = function(){
         },
         //BLUE
         {
-            label: _label,
+            label: "Blue",
             data: _data,
             backgroundColor: [
                 '#0B7A67B0'
@@ -335,7 +338,7 @@ var createColorGraph = function(){
                 '#0B7A67'
             ],
             borderWidth:1
-        }]
+        }*/]
     };
 };
 
