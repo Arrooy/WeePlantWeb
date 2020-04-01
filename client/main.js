@@ -294,9 +294,10 @@ var getData = function(dataType){
 
 var createColorGraph = function(){
     
+    var _labels;
     colour_data.colour[0].forEach(element=>{
         _labels.push("");
-        values.push(element.y);
+      
     });
 
 
@@ -308,19 +309,19 @@ var createColorGraph = function(){
             label: "Red",
             data: colour_data.colour[0],
             backgroundColor: [
-                '#0B7A67B0'
+                '#FF0000'
             ],
             borderColor: [
                 '#0B7A67'
             ],
             borderWidth:1
-        }/*,
+        },
         //GREEN
         {
             label: "Green",
             data: _data,
             backgroundColor: [
-                '#0B7A67B0'
+                '#00FF00'
             ],
             borderColor: [
                 '#0B7A67'
@@ -332,13 +333,13 @@ var createColorGraph = function(){
             label: "Blue",
             data: _data,
             backgroundColor: [
-                '#0B7A67B0'
+                '#0000FF'
             ],
             borderColor: [
                 '#0B7A67'
             ],
             borderWidth:1
-        }*/]
+        }]
     };
 };
 
