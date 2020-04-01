@@ -58,6 +58,13 @@ var dropdownClick = function(event){
     //S'actualitza les dades de la grafica amb les dades obtingudes amb getCurrentPlants_RESPONSE.
     var dataset = getData(selection.text);
     console.log("Requesting: "+  selection.text);
+
+    if(selection.text == "Colour"){
+        $('.informationPanel').css("visibility","hidden");
+    }else{
+        $('.informationPanel').css("visibility","visible");
+    }
+
     drawGraph(dataset);
 };
 
@@ -307,7 +314,7 @@ var createColorGraph = function(){
             label: "Red",
             data: colour_data.colour[0],
             backgroundColor: [
-                '#CD2626'
+                '#CD2626CC'
             ],
             borderColor: [
                 '#CD2626'
@@ -319,7 +326,7 @@ var createColorGraph = function(){
             label: "Green",
             data: colour_data.colour[1],
             backgroundColor: [
-                '#4DBD33'
+                '#4DBD33CC'
             ],
             borderColor: [
                 '#4DBD33'
@@ -331,7 +338,7 @@ var createColorGraph = function(){
             label: "Blue",
             data: colour_data.colour[2],
             backgroundColor: [
-                '#63D1F4'
+                '#63D1F4CC'
             ],
             borderColor: [
                 '#63D1F4'
