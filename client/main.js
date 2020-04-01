@@ -303,14 +303,14 @@ var createColorGraph = function(){
         labels: _labels,
         datasets: [
             //RED
-            {
+        {
             label: "Red",
             data: colour_data.colour[0],
             backgroundColor: [
-                '#FF0000'
+                '#CD2626'
             ],
             borderColor: [
-                '#0B7A67'
+                '#CD2626'
             ],
             borderWidth:1
         },
@@ -319,10 +319,10 @@ var createColorGraph = function(){
             label: "Green",
             data: colour_data.colour[1],
             backgroundColor: [
-                '#00FF00'
+                '#4DBD33'
             ],
             borderColor: [
-                '#0B7A67'
+                '#4DBD33'
             ],
             borderWidth:1
         },
@@ -331,10 +331,10 @@ var createColorGraph = function(){
             label: "Blue",
             data: colour_data.colour[2],
             backgroundColor: [
-                '#0000FF'
+                '#63D1F4'
             ],
             borderColor: [
-                '#0B7A67'
+                '#63D1F4'
             ],
             borderWidth:1
         }]
