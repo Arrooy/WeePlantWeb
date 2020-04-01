@@ -175,7 +175,7 @@ var changeData = function(index) {
     $("#plantAge").text("Plant age: " + plantsData[index].age + " days");
     $("#gif").attr('src',plantsData[index].gif);
 
-    _data
+    
     var humidity_data_aux = plantsData[index].humidityValues;
     var grow_data_aux  = plantsData[index].growValues;
     //TODO
