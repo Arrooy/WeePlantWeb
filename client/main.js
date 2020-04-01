@@ -113,8 +113,6 @@ var configSocketsHandlers = function(){
         console.log("Got updated data from the backend!");
         console.log(data);
 
-        
-
         data.forEach(function(item, index){
             $('#pot' + item.pot_number).attr('is_full',true);
             $('#pot' + item.pot_number).attr('src','/client/Assets/potF' + item.pot_number + '.svg');

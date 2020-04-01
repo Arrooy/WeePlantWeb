@@ -66,8 +66,12 @@ io.sockets.on('connection', function(socket) {
     
     socket.on("shouldIOpenAPot",function(data){
         if(shouldIOpenAPot === true){
-            socket.emit('shouldIOpenAPot_RESPONSE',{
-                'potNumber':web_args.pot_number
+            
+            client.query("SELECT pot_number FROM plant WHERE name=\'" + web_args.name + "\'",
+            (error, results, fields) => {
+                socket.emit('shouldIOpenAPot_RESPONSE',{
+                    'potNumber':results.rows[0]
+                });    
             });
         }
     });
