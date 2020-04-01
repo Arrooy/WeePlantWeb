@@ -294,12 +294,10 @@ var getData = function(dataType){
 
 var createColorGraph = function(){
     
-    var _labels;
+    var _labels = [];
     colour_data.colour[0].forEach(element=>{
         _labels.push("");
-      
     });
-
 
     return{
         labels: _labels,
@@ -319,7 +317,7 @@ var createColorGraph = function(){
         //GREEN
         {
             label: "Green",
-            data: _data,
+            data: colour_data.colour[1],
             backgroundColor: [
                 '#00FF00'
             ],
@@ -331,7 +329,7 @@ var createColorGraph = function(){
         //BLUE
         {
             label: "Blue",
-            data: _data,
+            data: colour_data.colour[2],
             backgroundColor: [
                 '#0000FF'
             ],
