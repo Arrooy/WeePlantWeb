@@ -368,14 +368,14 @@ var drawGraph = function(_data_){
                     xAxes: [{
                         scaleLabel: {
                             display: true,
-                            labelString: data.datasets[0].label
+                            labelString: 'Temps'
                         }
                     }],
                     scales: {
                         yAxes: [{
                             scaleLabel: {
                                 display: true,
-                                labelString: 'Temps'
+                                labelString: _data_.datasets[0].label
                             }
                         }],
                     }
@@ -386,7 +386,7 @@ var drawGraph = function(_data_){
     }else{
         //Chart needs an update:
         myChart.data = _data_;
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = _data.datasets[0].label;
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = _data_.datasets[0].label;
         myChart.update();
     }
     
