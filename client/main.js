@@ -63,7 +63,9 @@ var dropdownClick = function(event){
 
     if(selection.text == "Colour histogram"){
         $('.informationPanel').css("visibility","hidden");
+        $('.arrow-down').css("right","41%");
     }else{
+        $('.arrow-down').css("right","43%");
         $('.informationPanel').css("visibility","visible");
     }
 
