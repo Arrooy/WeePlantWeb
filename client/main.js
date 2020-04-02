@@ -65,7 +65,7 @@ var dropdownClick = function(event){
         $('.informationPanel').css("visibility","hidden");
         $('.arrow-down').css("right","41%");
     }else{
-        $('.arrow-down').css("right","43%");
+        $('.arrow-down').css("right","ç43%");
         $('.informationPanel').css("visibility","visible");
     }
 
