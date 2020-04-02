@@ -13,6 +13,8 @@ var db_loaded;
 
 var myChart;
 
+var cheatXAxisName;
+
 //Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
 var plantAdditionSuccessful;
 
@@ -59,7 +61,7 @@ var dropdownClick = function(event){
     var dataset = getData(selection.text);
     console.log("Requesting: "+  selection.text);
 
-    if(selection.text == "Colour"){
+    if(selection.text == "Colour histogram"){
         $('.informationPanel').css("visibility","hidden");
     }else{
         $('.informationPanel').css("visibility","visible");
@@ -229,26 +231,34 @@ var getData = function(dataType){
     var _data = [{x:0,y:10},
                 {x:1,y:1}];
 
+    
+
     switch(dataType){
         case "Humidity":
             console.log("Humidity!");
             _label = 'Relative humidity';
-            
+            cheatXAxisName = "Time";        
+            cheatYAxisName = "%";        
             _data = humidity_data;
             break;
         case "Grow":
             console.log("Grow!");
             _label = 'Plant height';
-
+            cheatXAxisName = "Time";
+            cheatYAxisName = "cm";
             _data = grow_data;
             break;
         case "Watering":
             console.log("Watering!");
             _label = 'Amount of water';
+            cheatXAxisName = "Time";
+            cheatYAxisName = "cl";
             _data = watering_data;
             break;
-        case "Colour":
-            console.log("Color!");
+        case "Colour histogram":
+            console.log("Color !");
+            cheatXAxisName = "";
+            cheatYAxisName = "";
             return createColorGraph();
         default:       
     }
