@@ -382,17 +382,15 @@ var drawGraph = function(_data_){
                             display: true,
                             labelString: cheatXAxisName
                         }
-                    }],
-                    scales: {
-                        yAxes: [{
-                            scaleLabel: {
-                                display: true,
-                                labelString: cheatYAxisName
-                            }
-                        }],
-                    }
-                }
+                    }],    
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: cheatYAxisName
+                        }
                 
+                    }]
+                }
             }
         });
     }else{
