@@ -363,25 +363,30 @@ var drawGraph = function(_data_){
                     displayColors: false,
                     mode: 'nearest',
                     intersect: 'false',
-                }/*,
-                xAxes: [{
-                    ticks: {
-                        
-                        suggestedMax: 100
-                    }
-                }],
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
+                },
+                scales:{
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: data.datasets[0].label
                         }
                     }],
-                }*/
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Temps'
+                            }
+                        }],
+                    }
+                }
+                
             }
         });
     }else{
         //Chart needs an update:
         myChart.data = _data_;
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = _data.datasets[0].label;
         myChart.update();
     }
     
