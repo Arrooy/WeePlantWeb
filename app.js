@@ -163,7 +163,17 @@ var continueWithDates = async function(plants, socket){
     var plantColor = [];
     var plantWatering = [];
 
+    var filtered = plants.filter(function (el) {
+        return el != null && el != undefined;
+      });
+
+    
+    console.log("Filtered is " + filtered);
+    console.log("Non filteres is " + plants);
+    plants = filtered;
+    
     plants.forEach(element => {
+    
         console.log("Getting from id" + element.plant_id);
         //Calculate Age.
         client.query(
@@ -231,6 +241,7 @@ var continueWithDates = async function(plants, socket){
             }
         });
     });
+
 
     while(plantAge.length !== plants.length 
           || plantHumidity.length !== plants.length 
@@ -337,7 +348,6 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
       await sleep(100);
     }
 
-    console.log("FOTOS DONE. ID 1 has " + gifImages[1].length);
     var stream =  [];
     var fileSaved = 0;
     gifImages.forEach(function(element,index){
@@ -371,8 +381,8 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
         console.log("GIF CREATED");
     });
 
-
-    while(fileSaved != 3){
+    
+    while(fileSaved != plants.length){ //3
         await sleep(100);
     }
 
