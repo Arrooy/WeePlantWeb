@@ -381,11 +381,14 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
         console.log("GIF CREATED");
     });
 
+    print("Waiting all gifs to be created");
     
     while(fileSaved != plants.length){ //3
         await sleep(100);
     }
 
+    print("Gifs created!");
+    
     var index = 0;
     
     plants.forEach(element =>{
