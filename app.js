@@ -125,6 +125,8 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on("getCurrentPlants",function(){
+        console.log("Getting current plants");
+
         var plants = [];
         //Request plant pot 1
         client.query("SELECT plant_id, pot_number, name FROM plant WHERE pot_number=1",
@@ -134,6 +136,7 @@ io.sockets.on('connection', function(socket) {
                 console.log(error);
             }else{
                 plants.push(results.rows[0]);
+                console.log("Chachi")
 
                 //Request plant pot 2
                 client.query("SELECT plant_id, pot_number, name FROM plant WHERE pot_number=2",
@@ -151,6 +154,7 @@ io.sockets.on('connection', function(socket) {
                                 console.log(error);
                             }else{
                                 plants.push(results.rows[0]);
+                                console.log("Chachi PIRULI")
                                 continueWithDates(plants,socket);
                             }
                         });
@@ -359,6 +363,7 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
 
     var stream =  [];
     var fileSaved = 0;
+
     gifImages.forEach(function(element,index){
 
         //Now lets actually create the gif.    
