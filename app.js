@@ -87,6 +87,12 @@ io.sockets.on('connection', function(socket) {
         console.log("Request QR code of pot is cancelled!");
         socket.broadcast.emit("[ABORT_PLANT]", data);
     });
+
+    socket.on("REFRESH",function(data){
+        
+        console.log("Request a full refresh! RESTARTING ALL!");
+        socket.emit("REFRESH_frontent", data);
+    });
     
     socket.on("QRReading",function(plant_PK){
         //Plant PK contains the PK

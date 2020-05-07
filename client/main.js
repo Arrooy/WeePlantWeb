@@ -89,6 +89,12 @@ var modalOpened = function(modal, trigger){
 };
 
 var configSocketsHandlers = function(){
+
+    
+    socket.on("REFRESH_frontent", function(useless){
+        location.reload(true);
+    });
+    
     socket.on("QRReading_frontend", function(pkdict){
         //Plant PK contains the PK
         console.log("PK obtained is " + pkdict.pk);
