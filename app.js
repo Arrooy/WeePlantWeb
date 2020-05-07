@@ -305,7 +305,7 @@ var createGIF = async function(plants,socket){
             console.log("Error in query!");
             console.log(error);
         }else{
-            
+            console.log("There are " +  results.rows[0].count + " images");
             continueWithGIF(plants, results.rows[0].count, socket);
         }
     });    
@@ -325,11 +325,14 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
                 console.log("Error in query!");
                 console.log(error);
             }else{
-                
+                console.log("Image query done with id " + element.plant_id);
+
                 (results.rows).forEach(element2 =>{
                     
                     var image = new Image();
                     image.onload = function() {
+                        console.log("Image loaded. ");
+
                         countImages++;
                         if(gifImages[element.plant_id] == undefined){
                             gifImages[element.plant_id] = [image];  
@@ -381,13 +384,13 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
         console.log("GIF CREATED");
     });
 
-    print("Waiting all gifs to be created");
+    console.log("Waiting all gifs to be created");
     
     while(fileSaved != plants.length){ //3
         await sleep(100);
     }
 
-    print("Gifs created!");
+    console.log("Gifs created!");
     
     var index = 0;
     
