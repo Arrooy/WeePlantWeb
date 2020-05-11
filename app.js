@@ -91,7 +91,7 @@ io.sockets.on('connection', function(socket) {
     socket.on("REFRESH",function(data){
         
         console.log("Request a full refresh! RESTARTING ALL!");
-        socket.emit("REFRESH_frontent", data);
+        socket.broadcast.emit("REFRESH_frontent", data);
     });
     
     socket.on("QRReading",function(plant_PK){
@@ -119,7 +119,7 @@ io.sockets.on('connection', function(socket) {
        */
 
        //NOTA: AQUI ESTAVA POSAT UN BROADCAST i lhe modificat!
-       socket.emit("QRReading_frontend", {'pk':plant_PK,
+       socket.broadcast.emit("QRReading_frontend", {'pk':plant_PK,
                                                     'potNumber':workingPot
                                                     });
     });
@@ -325,6 +325,8 @@ var createGIF = async function(plants,socket){
 var continueWithGIF = async function(plants, numberOfPhotos, socket){
     var gifImages = [];
     var countImages = 0;
+
+    console.log("number of photos is " + numberOfPhotos)
     
      plants.forEach(element => {
         //Get images values
@@ -336,7 +338,9 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
                 console.log(error);
             }else{
                 console.log("Image query done with id " + element.plant_id);
-
+                if(results.rows.length == 0){
+                    
+                }
                 (results.rows).forEach(element2 =>{
                     
                     var image = new Image();
@@ -361,54 +365,69 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
       await sleep(100);
     }
 
-    var stream =  [];
-    var fileSaved = 0;
 
-    gifImages.forEach(function(element,index){
+    if(numberOfPhotos != 0){
+        var stream =  [];
+        var fileSaved = 0;
 
-        //Now lets actually create the gif.    
-        const encoder = new GIFEncoder(320, 240);
+        gifImages.forEach(function(element,index){
+
+            //Now lets actually create the gif.    
+            const encoder = new GIFEncoder(320, 240);
+            
+            // stream the results as they are available into myanimated.gif
+            stream[index] = encoder.createReadStream().pipe(fs.createWriteStream('./gifs/myanimated' + index + '.gif'));
+
+            stream[index].on('finish', () => {
+                fileSaved++;
+            });
+
+            encoder.start();
+            encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
+            encoder.setDelay(300);  // frame delay in ms
+            encoder.setQuality(10); // image quality. 10 is default.
         
-        // stream the results as they are available into myanimated.gif
-        stream[index] = encoder.createReadStream().pipe(fs.createWriteStream('./gifs/myanimated' + index + '.gif'));
+            // use node-canvas
+            const canvas = createCanvas(320, 240);
+            const ctx = canvas.getContext('2d');
+            
+            element.forEach(element2 =>{
+                ctx.drawImage(element2, 0, 0, 320, 240);
+                encoder.addFrame(ctx);
+            });
+            
+            encoder.finish();
 
-        stream[index].on('finish', () => {
-            fileSaved++;
+            console.log("GIF CREATED");
         });
 
-        encoder.start();
-        encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-        encoder.setDelay(300);  // frame delay in ms
-        encoder.setQuality(10); // image quality. 10 is default.
-    
-        // use node-canvas
-        const canvas = createCanvas(320, 240);
-        const ctx = canvas.getContext('2d');
+        console.log("Waiting all gifs to be created");
         
-        element.forEach(element2 =>{
-            ctx.drawImage(element2, 0, 0, 320, 240);
-            encoder.addFrame(ctx);
+        
+        while(fileSaved != plants.length){ //3
+            await sleep(100);
+        }
+
+        console.log("Gifs created!");
+        
+        var index = 0;
+    
+        plants.forEach(element =>{
+            index++;
+            element.gif = 'data:image/gif;base64,' + fs.readFileSync('./gifs/myanimated' + (index) + '.gif',{encoding:"BASE64"});
         });
-        
-        encoder.finish();
-
-        console.log("GIF CREATED");
-    });
-
-    console.log("Waiting all gifs to be created");
     
-    while(fileSaved != plants.length){ //3
-        await sleep(100);
+    }else{
+        console.log("There are no images yet!");
+        
+        /*
+        plants.forEach(element =>{
+            index++;
+            element.gif = ''
+        });
+        */
     }
 
-    console.log("Gifs created!");
-    
-    var index = 0;
-    
-    plants.forEach(element =>{
-        index++;
-        element.gif = 'data:image/gif;base64,' + fs.readFileSync('./gifs/myanimated' + (index) + '.gif',{encoding:"BASE64"});
-    });
     
     //Lets get the gif created and send it to the front-end.
     socket.emit('getCurrentPlants_RESPONSE', plants);

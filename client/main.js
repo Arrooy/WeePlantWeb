@@ -59,16 +59,59 @@ var dropdownClick = function(event){
     
     //S'actualitza les dades de la grafica amb les dades obtingudes amb getCurrentPlants_RESPONSE.
     var dataset = getData(selection.text);
+    if(dataset === "HELP!"){
+        console.log("No color data: ");
+        dataset = {
+            labels: [],
+            datasets: [
+                //RED
+            {
+                label: "Red",
+                data: [],
+                backgroundColor: [
+                    '#CD2626CC'
+                ],
+                borderColor: [
+                    '#CD2626'
+                ],
+                borderWidth:1
+            },
+            //GREEN
+            {
+                label: "Green",
+                data: [],
+                backgroundColor: [
+                    '#4DBD33CC'
+                ],
+                borderColor: [
+                    '#4DBD33'
+                ],
+                borderWidth:1
+            },
+            //BLUE
+            {
+                label: "Blue",
+                data: [],
+                backgroundColor: [
+                    '#63D1F4CC'
+                ],
+                borderColor: [
+                    '#63D1F4'
+                ],
+                borderWidth:1
+            }]
+        };
+
+    }
     console.log("Requesting: "+  selection.text);
 
     if(selection.text == "Colour histogram"){
         $('.informationPanel').css("visibility","hidden");
         $('.arrow-down').css("right","41%");
     }else{
-        $('.arrow-down').css("right","ç43%");
+        $('.arrow-down').css("right","43%");
         $('.informationPanel').css("visibility","visible");
-    }
-
+    }    
     drawGraph(dataset);
 };
 
@@ -184,49 +227,51 @@ var configPots = function() {
 
 var changeData = function(index) {
     
-    if(index >= plantsData.length)
-        return;
+    var i = 0;
+    var plantDataAux;
 
-    //Update the view with the new data.
-    $("#plantName").text(plantsData[index].name);
-    $("#plantAge").text("Plant age: " + plantsData[index].age + " days");
-    $("#gif").attr('src',plantsData[index].gif);
-
-
-    var humidity_data_aux = plantsData[index].humidityValues;
-    var grow_data_aux  = plantsData[index].growValues;
+    plantsData.forEach(e => {
+        if(e.pot_number - 1  == index){
+            plantDataAux = plantsData[i];
+            i++;
+        }
+    });
     
-    colour_data = plantsData[index].colourValues[plantsData[index].colourValues.length - 1];
-    var watering_data_aux = plantsData[index].wateringValues;
+    //Update the view with the new data.
+    $("#plantName").text(plantDataAux.name);
+    $("#plantAge").text("Plant age: " + plantDataAux.age + " days");
+    $("#gif").attr('src',plantDataAux.gif);
+    
+
+    var humidity_data_aux = plantDataAux.humidityValues;
+    var grow_data_aux  = plantDataAux.growValues;
+    
+    colour_data = plantDataAux.colourValues[plantDataAux.colourValues.length - 1];
+    var watering_data_aux = plantDataAux.wateringValues;
     
     //Clear array.
     humidity_data = [];
     //Add data with new format
     humidity_data_aux.forEach(function(element,index){
-        if(index != 0){
-            var d = new Date(element.time);
-            humidity_data.push({x:d.getSeconds() + d.getMinutes() * 60,y:element.value});
-        }
+        var d = new Date(element.time);
+        humidity_data.push({x:d.getSeconds() + d.getMinutes() * 60,y:element.value});
     });
     
     //Clear array.
     grow_data = [];
     //Add data with new format
     grow_data_aux.forEach(function(element,index){
-        if(index != 0){
-            var d = new Date(element.time);
-            grow_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.height});
-        }
+  
+        var d = new Date(element.time);
+        grow_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.height});
     });
 
     //Clear array.
     watering_data = [];
     //Add data with new format
     watering_data_aux.forEach(function(element,index){
-        if(index != 0){
-            var d = new Date(element.time);
-            watering_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.water_applied});
-        }
+        var d = new Date(element.time);
+        watering_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.water_applied});
     });
 
     var data = getData("Humidity");
@@ -267,6 +312,7 @@ var getData = function(dataType){
             console.log("Color !");
             cheatXAxisName = "";
             cheatYAxisName = "";
+            if(colour_data == undefined) return "HELP!" 
             return createColorGraph();
         default:       
     }
@@ -320,6 +366,7 @@ var getData = function(dataType){
 var createColorGraph = function(){
     
     var _labels = [];
+
     colour_data.colour[0].forEach(element=>{
         _labels.push("");
     });
