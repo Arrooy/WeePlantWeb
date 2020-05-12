@@ -73,7 +73,7 @@
                 <p id="MinimumGradientValue" class="statistic">Minimum Gradient: 1</p>
                 <p id="MaximumGradientValue" class="statistic">Maximum Gradient: 1</p>
             </div> 
-            <img id="gif" src="https://media.giphy.com/media/stYnZNptINFsY/giphy.gif">
+            <img id="gif" src="https://e-fisiomedic.com/wp-content/uploads/2013/11/default-placeholder-300x300.png">
           </div>
             
     </div>
@@ -89,6 +89,7 @@
               </h2>
               <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
             </header>
+            <main>
             <br class="modal__content" id="modal-1-content">
               <p>
                 When the robot stops moving, present the <b>QR</b> in front of the robot camera.
@@ -130,6 +131,31 @@
             <br class="modal__content" id="modal-2-content">
               <p>Please wait a for a sec...</p>
               <div class="lds-ripple"><div></div><div></div></div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 3 Plant read dont exist. Want to add?-->
+
+      <div class="modal micromodal-slide" id="modal-3" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1">
+          <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-3-title">
+            <header class="modal2__header">
+              <h2 class="modal__title" id="modal-3-title">
+                Plant <b id="modal_3_1_to_change"></b> scanned
+              </h2>
+              <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+            </header>
+            <main>
+            <br class="modal__content" id="modal-3-content">
+              <p>This plant is not currently used by the system.</p>
+              <p>Do you want the robot to add <b id="modal_3_to_change">PAPASITO</b> and take care of it?</p>
+              <br class="modal__content" id="modal-3-content">
+              <footer class="modal__footer">
+                <button class="modal__btn" id="modal_add_plant"  aria-label="Yes">Yes</button>
+                <button class="modal__btn" data-micromodal-close aria-label="Cancel">Cancel</button>
+              </footer>
             </main>
           </div>
         </div>

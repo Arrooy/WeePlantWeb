@@ -10,25 +10,29 @@ var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 
-var web_args;
+var web_args = {};
+var qr = "";
 
 var shouldIOpenAPot = false;
-//www.weeplant.es:80/?name=deictics_plant&pot_number=404&watering_time=10&moisture_threshold=.2&moisture_period=60&photo_period=500"""
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
     
     var url = require('url');
     var url_parts = url.parse(req.url, true);
+    qr = url_parts.path;
     web_args = url_parts.query;
     var len = Object.keys(web_args).length;
     
-    
     if(len != 0){
-        console.log("ARGS: \n");
+        console.log("ARGS:");
         console.log(web_args);
         shouldIOpenAPot = true;
-        res.redirect('/');
+        //res.redirect('/');
+        
+        //ioWEBQR(qr);
+        //ioArgsStuff(web_args);
+        ioStuff(web_args.name,qr);
     }
 });
 
@@ -57,75 +61,108 @@ const client = new Client({
 //Connect to PostgreSQL.
 client.connect();
 
-//SocketIO connection. https://www.npmjs.com/package/websocket
-var io = require('socket.io')(serv, {});
-
+var broadcastNeeded = false;
 var workingPot = 0;
 
-io.sockets.on('connection', function(socket) {
+var io = require('socket.io')(serv, {});
+
+var ioArgsStuff = function(argVar){
+    io.sockets.on('connection', function(socket) {
+       
+    });
+};
+
+var ioWEBQR = function(qr){
+    io.sockets.on('connection', function(socket) {
+        
+        
+    });
+};
+
+
+var ioStuff = function(argVar,qr){
+    //SocketIO connection. https://www.npmjs.com/package/websocket
+    console.log("PAPITO ONCE")
+    io.sockets.on('connection', function(socket) {
+              
     
-    socket.on("shouldIOpenAPot",function(data){
-        if(shouldIOpenAPot === true){
+
+        socket.removeAllListeners('newPot');
+        socket.on("newPot",function(data){
+            workingPot = data;
+            console.log("Request QR code of pot #" + data);
+            socket.broadcast.emit("[ADD_PLANT]", data);
+        });
+        
+        socket.removeAllListeners('newPot_CANCELL');
+        socket.on("newPot_CANCELL",function(data){
+            workingPot = -1;
+            console.log("Request QR code of pot is cancelled!");
+            socket.broadcast.emit("[ABORT_PLANT]", data);
+        });
+
+        socket.removeAllListeners('REFRESH');
+        socket.on("REFRESH",function(data){
             
-            client.query("SELECT pot_number FROM plant WHERE name=\'" + web_args.name + "\'",
-            (error, results, fields) => {
-                socket.emit('shouldIOpenAPot_RESPONSE',{
-                    'potNumber':results.rows[0]
-                });    
+            console.log("Request a full refresh! RESTARTING ALL!");
+            socket.broadcast.emit("REFRESH_frontent", data);
+        });
+        
+        socket.removeAllListeners('QRReading');
+        socket.on("QRReading",function(plant_PK){
+            //Plant PK contains the PK
+            console.log("Python QR response. Starting getting the data from db.");
+            broadcastNeeded = true;
+            startGetCurrentPlants(socket);
+        });
+
+        socket.removeAllListeners('getCurrentPlants');
+        socket.on("getCurrentPlants",function(){
+            broadcastNeeded = false;
+            startGetCurrentPlants(socket); 
+        });
+
+
+        if(argVar != ""){
+            socket.removeAllListeners('shouldIOpenAPot');
+            socket.on("shouldIOpenAPot",function(data){
+                
+                if(shouldIOpenAPot == true){
+                    client.query("SELECT pot_number FROM plant WHERE name=\'" + argVar + "\'",
+                    (error, results, fields) => {
+                        if(results.rows[0] == undefined){
+                            socket.emit('shouldIOpenAPot_RESPONSE', {
+                                "potNumber":results.rows[0],
+                                "plantName":argVar
+                            });
+                        }else{
+                            socket.emit('shouldIOpenAPot_RESPONSE',{
+                                "potNumber":results.rows[0],
+                                "plantName":undefined
+                            });   
+                        } 
+                    });
+                    shouldIOpenAPot = false;
+                }else{
+                    socket.emit('shouldIOpenAPot_RESPONSE',"0");   
+                }
+            });
+        }
+        if(qr != ""){
+
+            socket.removeAllListeners('newPot_WEB_KNOWS_QR');
+            socket.on("newPot_WEB_KNOWS_QR",function(data){
+                console.log("WEB KNOWS THE QR, send it to Python.");
+                socket.broadcast.emit("[WEB_KNOWS_QR]",[data,qr]);
             });
         }
     });
+};
+ioStuff("","");
 
-    socket.on("newPot",function(data){
-        workingPot = data;
-        console.log("Request QR code of pot #" + data);
-        socket.broadcast.emit("[ADD_PLANT]", data);
-    });
-    
-    socket.on("newPot_CANCELL",function(data){
-        workingPot = -1;
-        console.log("Request QR code of pot is cancelled!");
-        socket.broadcast.emit("[ABORT_PLANT]", data);
-    });
 
-    socket.on("REFRESH",function(data){
-        
-        console.log("Request a full refresh! RESTARTING ALL!");
-        socket.broadcast.emit("REFRESH_frontent", data);
-    });
-    
-    socket.on("QRReading",function(plant_PK){
-        //Plant PK contains the PK
-        console.log("Python QR response. Got the plant PK.");
-        
-        /*
-        var plant_packet = {
-            Name:"ERROR",
-            Age:-1
-        };
-
-        //Get Name, calculate Age.
-        client.query(
-            "SELECT DATE_PART('day', timezone('Europe/Madrid',CURRENT_TIMESTAMP) -"+
-            " (SELECT time from plant WHERE plant_id=" + plant_PK + "));",
-            (error, results, fields) => {
-            if(error !== null){
-                console.log("Error in query!");
-                console.log(error);
-            }
-            plant_packet.Age = results.rows[0].date_part;
-            //client.end();
-        });
-       */
-
-       //NOTA: AQUI ESTAVA POSAT UN BROADCAST i lhe modificat!
-       socket.broadcast.emit("QRReading_frontend", {'pk':plant_PK,
-                                                    'potNumber':workingPot
-                                                    });
-    });
-
-    socket.on("getCurrentPlants",function(){
-        console.log("Getting current plants");
+var startGetCurrentPlants = function(socket){
+    console.log("Getting current plants");
 
         var plants = [];
         //Request plant pot 1
@@ -136,7 +173,6 @@ io.sockets.on('connection', function(socket) {
                 console.log(error);
             }else{
                 plants.push(results.rows[0]);
-                console.log("Chachi")
 
                 //Request plant pot 2
                 client.query("SELECT plant_id, pot_number, name FROM plant WHERE pot_number=2",
@@ -154,7 +190,6 @@ io.sockets.on('connection', function(socket) {
                                 console.log(error);
                             }else{
                                 plants.push(results.rows[0]);
-                                console.log("Chachi PIRULI")
                                 continueWithDates(plants,socket);
                             }
                         });
@@ -162,8 +197,7 @@ io.sockets.on('connection', function(socket) {
                 });
             }
         });
-    });
-});
+};
 
 //Part 2 of the callback chain.
 var continueWithDates = async function(plants, socket){
@@ -177,9 +211,6 @@ var continueWithDates = async function(plants, socket){
         return el != null && el != undefined;
       });
 
-    
-    console.log("Filtered is " + filtered);
-    console.log("Non filteres is " + plants);
     plants = filtered;
     
     plants.forEach(element => {
@@ -315,7 +346,6 @@ var createGIF = async function(plants,socket){
             console.log("Error in query!");
             console.log(error);
         }else{
-            console.log("There are " +  results.rows[0].count + " images");
             continueWithGIF(plants, results.rows[0].count, socket);
         }
     });    
@@ -326,45 +356,54 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
     var gifImages = [];
     var countImages = 0;
 
-    console.log("number of photos is " + numberOfPhotos)
+    console.log("number of images: " + numberOfPhotos);
     
-     plants.forEach(element => {
-        //Get images values
-        client.query(
-            "SELECT image FROM imatge where plant_id=" +  element.plant_id + ";",
-            (error, results, fields) => {
-            if(error !== null){
-                console.log("Error in query!");
-                console.log(error);
-            }else{
-                console.log("Image query done with id " + element.plant_id);
-                if(results.rows.length == 0){
+    var adria =  {
+        "1":0,
+        "2":0,
+        "3":0
+    };
+
+    if(numberOfPhotos != 0){
+        console.log("ITERATING !!!")
+        plants.forEach(element => {
+            //Get images values
+            client.query(
+                "SELECT image FROM imatge where plant_id=" +  element.plant_id + ";",
+                (error, results, fields) => {
+                if(error !== null){
+                    console.log("Error in query!");
+                    console.log(error);
+                }else{
+                    console.log("Image query done with id " + element.plant_id);
                     
+                    (results.rows).forEach(element2 =>{
+                        
+                        var image = new Image();
+                        image.onload = function() {
+                            console.log("Image loaded from plant with id " + element.plant_id);
+                            adria[element.plant_id] = adria[element.plant_id] + 1;
+                            countImages++;
+                            if(gifImages[element.plant_id] == undefined){
+                                gifImages[element.plant_id] = [image];  
+                            }else{
+                                gifImages[element.plant_id].push(image);
+                            }
+                        };
+                        image.src = 'data:image/jpg;base64,' + element2.image;
+                    }); 
                 }
-                (results.rows).forEach(element2 =>{
-                    
-                    var image = new Image();
-                    image.onload = function() {
-                        console.log("Image loaded. ");
+            });       
+        });
+    }
 
-                        countImages++;
-                        if(gifImages[element.plant_id] == undefined){
-                            gifImages[element.plant_id] = [image];  
-                        }else{
-                            gifImages[element.plant_id].push(image);
-                        }
-                    };
-                    image.src = 'data:image/jpg;base64,' + element2.image;
-                }); 
-            }
-        });       
-    });
-
-    
     while(numberOfPhotos !=  countImages){
       await sleep(100);
     }
 
+    console.log("Adria is :")
+    console.log(adria)
+    
 
     if(numberOfPhotos != 0){
         var stream =  [];
@@ -379,6 +418,7 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
             stream[index] = encoder.createReadStream().pipe(fs.createWriteStream('./gifs/myanimated' + index + '.gif'));
 
             stream[index].on('finish', () => {
+                adria[index] = 0;
                 fileSaved++;
             });
 
@@ -403,18 +443,19 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
 
         console.log("Waiting all gifs to be created");
         
-        
-        while(fileSaved != plants.length){ //3
+        while(!(adria["1"] == 0 && adria["2"] == 0 && adria["3"] == 0)){ //3
+        //while(fileSaved != plants.length){ //3
             await sleep(100);
         }
 
-        console.log("Gifs created!");
+        console.log("Gifs created! Files saved is " + fileSaved);
         
         var index = 0;
     
         plants.forEach(element =>{
             index++;
-            element.gif = 'data:image/gif;base64,' + fs.readFileSync('./gifs/myanimated' + (index) + '.gif',{encoding:"BASE64"});
+            if(gifImages[index] != undefined)
+                element.gif = 'data:image/gif;base64,' + fs.readFileSync('./gifs/myanimated' + (index) + '.gif',{encoding:"BASE64"});
         });
     
     }else{
@@ -428,12 +469,15 @@ var continueWithGIF = async function(plants, numberOfPhotos, socket){
         */
     }
 
-    
+    console.log("All done. Sending data to frontdend!");
     //Lets get the gif created and send it to the front-end.
-    socket.emit('getCurrentPlants_RESPONSE', plants);
+    if(broadcastNeeded)
+        socket.broadcast.emit('getCurrentPlants_RESPONSE', plants);
+    else
+        socket.emit('getCurrentPlants_RESPONSE', plants);
 };
 
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
+};

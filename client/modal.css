@@ -26,6 +26,11 @@
     box-sizing: border-box;
     color:#08415C;
   }
+
+  .modal__footer{
+    text-align: right;
+    align-items: right;
+  }
   
   .modal__header {
     display: flex;

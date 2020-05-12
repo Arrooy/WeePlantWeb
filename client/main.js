@@ -17,13 +17,19 @@ var cheatXAxisName;
 
 //Boolean per indicar si lusuari ha tencat el modal intencionadament o no. Si equival a true, s'ha tencat automaticament.
 var plantAdditionSuccessful;
+var requestedAdditionModal3;
+var working_pot;
 
-var plantRequestNumber;
+var plant_name_modal_3 = "";
+
+var firstPageLoad;
 
 $(document).ready(function() {
+    firstPageLoad = true;
+    requestedAdditionModal3 = false;
+    working_pot = 0;
 
-    plantRequestNumber = 0;
-    
+
     configIcon();
     configPots();
     configModal();
@@ -38,8 +44,9 @@ $(document).ready(function() {
 //Demanem al backend les plantes que hi han.
 var addCurrentPlants = function(){
     //El backend contestara amb getCurrentPlants_RESPONSE
+    console.log("Requesting get current plants in main one tme!")
     socket.emit("getCurrentPlants","");
-    socket.emit("shouldIOpenAPot");
+    firstPageLoad = true;
 };
 
 var configDropdownMenu = function(){
@@ -121,68 +128,148 @@ var modalClosed = function(modal, trigger){
         console.log("Modal closed. New plant added ok.");
     }else{
         console.log("Modal closed due to user intervention.");
-        //socket.emit("CANCELL", ""); 
+        socket.emit("newPot_CANCELL", ""); 
     }
+    plant_name_modal_3 = "";
 
     plantAdditionSuccessful = false;
 };
 
 var modalOpened = function(modal, trigger){
+};
+
+var getNextPotAvailable = function(){
+    for (var index = 1; index <= 3; index++) {
+        if($("#pot" + index).attr('is_full') === "true"){
+            console.log("Pot " + index + " is full, trying with next");
+        }else{
+            return index;
+        }
+    }
+    return -1;
+}
+
+var modal3Opened = function(modal,trigger){
+    console.log("Modal 3 opened");
     
+    
+    $("#modal_3_1_to_change").text(plant_name_modal_3);
+
+    $("#modal_3_to_change").text(plant_name_modal_3);
+
+    $("#modal_add_plant").on('click', function() {
+        
+        var pot_number = getNextPotAvailable();
+
+        plantAdditionSuccessful = false;
+        requestedAdditionModal3 = true;
+        console.log("Adding new plant with dialog 3 help.");
+        socket.emit("newPot_WEB_KNOWS_QR", pot_number);            
+        
+        /*
+        MicroModal.close('modal-3');
+
+
+        MicroModal.show('modal-1',{
+            onShow: modalOpened,
+            onClose: modalClosed
+        });
+        */
+        working_pot = pot_number;
+        
+    });
+}
+
+var modal3Closed = function(modal,trigger){
+    console.log("Modal 3 closed");
 };
 
 var configSocketsHandlers = function(){
-
     
-    socket.on("REFRESH_frontent", function(useless){
-        location.reload(true);
-    });
-    
-    socket.on("QRReading_frontend", function(pkdict){
-        //Plant PK contains the PK
-        console.log("PK obtained is " + pkdict.pk);
-        plantAdditionSuccessful = true;
-        $('#pot' + pkdict.potNumber).attr('src','/client/Assets/potF'+pkdict.potNumber+'.svg');
-        MicroModal.close('modal-1'); 
-
-        plantRequestNumber = pkdict.potNumber;
-        socket.emit("getCurrentPlants","");  
-
-        $("#mainMenu").css("visibility", "hidden");
-        $("#plantMenu").css("visibility", "visible");
-    });
-
+    //http://localhost:2000/?name=Coolantus
     socket.on("shouldIOpenAPot_RESPONSE",function(data){
-        console.log("Someone scanned pot number " + data);
-        plantsData.forEach(element=>{
-            if(element.pot_number === data.potNumber){
-                //TOODO:
-                console.log("THE ELEMENT SCANNED WITH PHONE IS LOADED. WE CAN DISPLAY IT.");
+        var found = false;
+        
+        console.log(data)
+        if(data == "0") return;
+
+        if (data.plantName == undefined){
+            var pot_number = data.potNumber['pot_number'];
+        
+            console.log("Someone scanned pot number " + pot_number);
+            
+            plantsData.forEach(element=>{
+                if(element.pot_number == pot_number){
+                    found = true;
+                    working_pot = pot_number;
+                    changeData(pot_number);
+                    $("#mainMenu").css("visibility", "hidden");
+                    $("#plantMenu").css("visibility", "visible");
+                }
+            });
+        }else{
+            plant_name_modal_3 = data.plantName;
+        }
+
+        if(found == false){
+
+            if(getNextPotAvailable() == -1){
+                console.log("THERE ARE NO POTS AVAILABLE!");
+            }else{
+                MicroModal.close('modal-3');
+                MicroModal.show('modal-3',{
+                    onShow: modal3Opened,
+                    onClose: modal3Closed
+                });
+
             }
-        });
+        }
     });
+    
+    socket.on("REFRESH_frontent", function(pot_number){
+        if(pot_number == working_pot){
+            console.log("REFRESH requested. Updating data of current pot");
+            socket.emit("getCurrentPlants","");  
+        }else{
+            console.log("REFRESH requested. Skipping update.");
+        }
+        console.log("pot_number is " + pot_number + " working_pot is " + working_pot);
+    });
+
    
     //El backend respon amb les dades de les plantes.
     socket.on("getCurrentPlants_RESPONSE",function(data){
-        
-        plantsData = data;
-        
-        db_loaded = true;
-        MicroModal.close('modal-2');
-
         console.log("Got updated data from the backend!");
         console.log(data);
 
+        plantsData = data;
+        
+        if(requestedAdditionModal3){
+            console.log("We should close modal 3 now!")
+            MicroModal.close('modal-3');
+        }else{
+            socket.emit("shouldIOpenAPot");
+        }
+        plantAdditionSuccessful = true;
+
+        if(firstPageLoad){
+            MicroModal.close('modal-2');
+            db_loaded = true;
+            firstPageLoad = false;
+        }else{
+            console.log("Our working pot is " + working_pot);
+            changeData(working_pot);
+            
+            MicroModal.close('modal-1');
+            $("#mainMenu").css("visibility", "hidden");
+            $("#plantMenu").css("visibility", "visible");
+        }
+
         data.forEach(function(item, index){
+            console.log("\t\tSetting  #pot" + item.pot_number + " to true");
             $('#pot' + item.pot_number).attr('is_full',true);
             $('#pot' + item.pot_number).attr('src','/client/Assets/potF' + item.pot_number + '.svg');
         });
-        
-        if(plantRequestNumber != 0){
-            changeData(plantRequestNumber - 1);
-        }
-        
-        plantRequestNumber = 0;
     });
 };
 
@@ -204,8 +291,11 @@ var configPots = function() {
         
 
         item.on('click', function() {
-            
+            working_pot = $(this).attr('number');
+
             if($(this).attr('is_full') === "false"){
+                plantAdditionSuccessful = false;
+                console.log("Nothing in the pot. Adding new plant.");
                 //Espera la resposta del backend QRReading_frontend
                 socket.emit("newPot", $(this).attr('number'));            
                 
@@ -215,7 +305,7 @@ var configPots = function() {
                 });
 
             }else{
-                changeData($(this).attr('number') - 1);
+                changeData($(this).attr('number'));
 
                 $("#mainMenu").css("visibility", "hidden");
                 $("#plantMenu").css("visibility", "visible");
@@ -230,18 +320,24 @@ var changeData = function(index) {
     var i = 0;
     var plantDataAux;
 
+    
     plantsData.forEach(e => {
-        if(e.pot_number - 1  == index){
+        if(e.pot_number  == index){
+            console.log("Setting data to pot index" + i);
             plantDataAux = plantsData[i];
-            i++;
         }
+        i++;
     });
     
     //Update the view with the new data.
     $("#plantName").text(plantDataAux.name);
     $("#plantAge").text("Plant age: " + plantDataAux.age + " days");
-    $("#gif").attr('src',plantDataAux.gif);
     
+    if(plantDataAux.gif == undefined){
+        $("#gif").attr('src',"https://e-fisiomedic.com/wp-content/uploads/2013/11/default-placeholder-300x300.png");
+    }else{
+        $("#gif").attr('src',plantDataAux.gif);
+    }
 
     var humidity_data_aux = plantDataAux.humidityValues;
     var grow_data_aux  = plantDataAux.growValues;
@@ -274,6 +370,7 @@ var changeData = function(index) {
         watering_data.push({x:d.getSeconds() + d.getMinutes() * 60, y:element.water_applied});
     });
 
+    $("#dropdown_name").text("Humidity");
     var data = getData("Humidity");
     drawGraph(data);
 };
@@ -284,11 +381,8 @@ var getData = function(dataType){
     var _data = [{x:0,y:10},
                 {x:1,y:1}];
 
-    
-
     switch(dataType){
         case "Humidity":
-            console.log("Humidity!");
             _label = 'Relative humidity';
             cheatXAxisName = "Time";        
             cheatYAxisName = "%";        
