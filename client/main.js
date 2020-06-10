@@ -461,7 +461,8 @@ var createColorGraph = function(){
     
     var _labels = [];
 
-    colour_data.colour[0].forEach(element=>{
+    
+    colour_data[colour_data["length"]-1][0].forEach(element=>{
         _labels.push("");
     });
 
@@ -471,7 +472,7 @@ var createColorGraph = function(){
             //RED
         {
             label: "Red",
-            data: colour_data.colour[0],
+            data: colour_data[colour_data["length"]-1][0],
             backgroundColor: [
                 '#CD2626CC'
             ],
@@ -483,7 +484,7 @@ var createColorGraph = function(){
         //GREEN
         {
             label: "Green",
-            data: colour_data.colour[1],
+            data: colour_data[colour_data["length"]-1][1],
             backgroundColor: [
                 '#4DBD33CC'
             ],
@@ -495,7 +496,7 @@ var createColorGraph = function(){
         //BLUE
         {
             label: "Blue",
-            data: colour_data.colour[2],
+            data: colour_data[colour_data["length"]-1][2],
             backgroundColor: [
                 '#63D1F4CC'
             ],
