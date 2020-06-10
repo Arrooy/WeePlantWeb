@@ -342,7 +342,7 @@ var changeData = function(index) {
     var humidity_data_aux = plantDataAux.humidityValues;
     var grow_data_aux  = plantDataAux.growValues;
     
-    colour_data = plantDataAux.colourValues[plantDataAux.colourValues.length - 1];
+    colour_data = plantDataAux.colourValues[plantDataAux.colourValues.length - 1].colour;
     var watering_data_aux = plantDataAux.wateringValues;
     
     //Clear array.
